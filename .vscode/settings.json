@@ -1,3 +1,21 @@
 {
-  "terminal.integrated.defaultProfile.windows": "Command Prompt"
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  "files.associations": {
+    "JUSTFILE": "makefile",
+    "*.lox": "lox",
+    "vector": "cpp",
+    "stdlib.h": "c",
+    "corecrt.h": "c",
+    "limits.h": "c",
+    "cstdlib": "c",
+    "common.h": "c",
+    "stdint.h": "c",
+    "assert.h": "c",
+    "array": "c",
+    "deque": "c",
+    "string": "c",
+    "unordered_map": "c",
+    "iterator": "c",
+    "string_view": "c"
+  }
 }

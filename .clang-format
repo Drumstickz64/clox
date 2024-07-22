@@ -1,2 +1,2 @@
-BasedOnStyle: Chromium
+BasedOnStyle: LLVM
 IndentWidth: 4

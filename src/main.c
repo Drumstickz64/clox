@@ -1,8 +1,16 @@
 #include <stdio.h>
 
+#include "chunk.h"
 #include "common.h"
+#include "debug.h"
 
-int main(int argc, char const* argv[]) {
-  printf("Hello, CLox!");
-  return 0;
+int main(int argc, const char *argv[]) {
+    Chunk chunk;
+    chunk_init(&chunk);
+    chunk_write(&chunk, OP_RETURN);
+
+    disassembleChunk(&chunk, "test chunk");
+
+    chunk_free(&chunk);
+    return 0;
 }

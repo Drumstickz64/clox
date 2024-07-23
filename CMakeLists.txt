@@ -4,4 +4,5 @@ project(clox VERSION 0.1.0 LANGUAGES C)
 add_executable(${PROJECT_NAME} "src/main.c"
                                "src/memory.c"
                                "src/chunk.c"
+                               "src/value.c"
                                "src/debug.c")

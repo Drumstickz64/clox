@@ -4,7 +4,7 @@
 #include "common.h"
 #include "debug.h"
 
-int main(int argc, const char *argv[]) {
+int main(void) {
     Chunk chunk;
     chunk_init(&chunk);
 

@@ -2,17 +2,25 @@
 #define clox_assert_h
 
 #include <stdio.h>
+#include <stdlib.h>
 
-#define ASSERT(expr, msg)                                                      \
-    if (!(expr)) {                                                             \
-        printf("ASSERTION FAILED: on %s:%d: %s: %s\n", (__FILE__), (__LINE__), \
-               #expr, (msg));                                                  \
-        exit(1);                                                               \
+#define ASSERT(expr, assertion)                                                \
+    {                                                                          \
+        if (!(expr)) {                                                         \
+            printf("\n========== ASSERTION FAILED ==========\nLOCATION: "      \
+                   "%s:%d\nEXPRESSION: "                                       \
+                   "%s\nASSERTED THAT: %s\n",                                  \
+                   (__FILE__), (__LINE__), (#expr), (assertion));              \
+            exit(1);                                                           \
+        }                                                                      \
     }
 
 #define UNREACHABLE(msg)                                                       \
-    printf("Entered unreachable code: on %s:%d: %s\n", (__FILE__), (__LINE__), \
-           msg);                                                               \
-    exit(1);
+    {                                                                          \
+        printf("========== ENTERED UNREACHABLE CODE ==========\nLOCATION: "    \
+               "%s:%d\nMESSAGE: %s\n",                                         \
+               (__FILE__), (__LINE__), (msg));                                 \
+        exit(1);                                                               \
+    }
 
 #endif

@@ -18,6 +18,8 @@
     "iterator": "c",
     "string_view": "c",
     "stdio.h": "c",
-    "stddef.h": "c"
+    "stddef.h": "c",
+    "math.h": "c",
+    "functional": "c"
   }
 }

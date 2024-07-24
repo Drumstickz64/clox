@@ -1,4 +1,6 @@
 #include "chunk.h"
+#include "assert.h"
+#include "math.h"
 #include "memory.h"
 
 void chunk_init(Chunk *chunk) {
@@ -31,6 +33,26 @@ void chunk_write(Chunk *chunk, uint8_t byte, int line) {
     chunk->code[chunk->count] = byte;
     chunk->lines[chunk->count] = line;
     chunk->count++;
+}
+
+void chunk_write_constant(Chunk *chunk, Value constant, int line) {
+    int index = chunk_add_constant(chunk, constant);
+    ASSERT(index <= 255 * 3, "chunk has no more than 765 constants, so that a "
+                             "3 byte index can to refer to them");
+
+    if (index <= 255) {
+        chunk_write(chunk, OP_CONSTANT, line);
+        chunk_write(chunk, index, line);
+        return;
+    }
+
+    chunk_write(chunk, OP_CONSTANT_LONG, line);
+    int index1 = 255;
+    int index2 = intclamp(0, index - 255, 255);
+    int index3 = intclamp(0, index - 255 - 255, 255);
+    chunk_write(chunk, index1, line);
+    chunk_write(chunk, index2, line);
+    chunk_write(chunk, index3, line);
 }
 
 int chunk_add_constant(Chunk *chunk, Value constant) {

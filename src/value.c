@@ -28,7 +28,7 @@ void value_array_write(ValueArray *array, Value value) {
     array->count++;
 }
 
-Value value_get(ValueArray *array, uint8_t i) {
+Value value_get(ValueArray *array, int i) {
     ASSERT(i < array->count, "index is in bounds");
     return array->values[i];
 }

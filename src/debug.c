@@ -16,15 +16,15 @@ static int constantInstruction(const char *name, Chunk *chunk, int offset) {
     return offset + 2;
 }
 
-void disassembleChunk(Chunk *chunk, const char *name) {
+void disassemble_chunk(Chunk *chunk, const char *name) {
     printf("== %s ==\n", name);
 
     for (int offset = 0; offset < chunk->count;) {
-        offset = disassembleInstruction(chunk, offset);
+        offset = disassemble_instruction(chunk, offset);
     }
 }
 
-int disassembleInstruction(Chunk *chunk, int offset) {
+int disassemble_instruction(Chunk *chunk, int offset) {
     printf("%04d ", offset);
 
     if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]) {

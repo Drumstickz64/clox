@@ -9,7 +9,7 @@
         if (!(expr)) {                                                         \
             printf("\n========== ASSERTION FAILED ==========\nLOCATION: "      \
                    "%s:%d\nEXPRESSION: "                                       \
-                   "%s\nASSERTED THAT: %s\n",                                  \
+                   "%s\nEXPECTED THAT: %s\n",                                  \
                    (__FILE__), (__LINE__), (#expr), (assertion));              \
             exit(1);                                                           \
         }                                                                      \

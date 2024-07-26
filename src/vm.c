@@ -37,6 +37,9 @@ static InterpretResult run(void) {
             push(constant);
             break;
         }
+        case OP_NEGATE:
+            push(-pop());
+            break;
         }
     }
 

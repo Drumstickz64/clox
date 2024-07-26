@@ -18,6 +18,7 @@
     "iterator": "c",
     "string_view": "c",
     "stdio.h": "c",
-    "stddef.h": "c"
+    "stddef.h": "c",
+    "chunk.h": "c"
   }
 }

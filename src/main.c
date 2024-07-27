@@ -14,7 +14,20 @@ int main(void) {
     int constant = chunk_add_constant(&chunk, 1.2);
     chunk_write(&chunk, OP_CONSTANT, 123);
     chunk_write(&chunk, constant, 123);
+
     chunk_write(&chunk, OP_NEGATE, 123);
+
+    constant = chunk_add_constant(&chunk, 3.14);
+    chunk_write(&chunk, OP_CONSTANT, 123);
+    chunk_write(&chunk, constant, 123);
+
+    chunk_write(&chunk, OP_SUBTRACT, 123);
+
+    constant = chunk_add_constant(&chunk, 5.6);
+    chunk_write(&chunk, OP_CONSTANT, 123);
+    chunk_write(&chunk, constant, 123);
+
+    chunk_write(&chunk, OP_DIVIDE, 123);
 
     chunk_write(&chunk, OP_RETURN, 123);
 

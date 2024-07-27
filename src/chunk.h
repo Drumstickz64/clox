@@ -4,7 +4,15 @@
 #include "common.h"
 #include "value.h"
 
-typedef enum OpCode { OP_CONSTANT, OP_NEGATE, OP_RETURN } OpCode;
+typedef enum OpCode {
+    OP_CONSTANT,
+    OP_NEGATE,
+    OP_ADD,
+    OP_SUBTRACT,
+    OP_MULTIPLY,
+    OP_DIVIDE,
+    OP_RETURN,
+} OpCode;
 
 typedef struct Chunk {
     int count;

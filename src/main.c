@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "assert.h"
 #include "chunk.h"
@@ -6,48 +8,75 @@
 #include "debug.h"
 #include "vm.h"
 
-int main(void) {
-    init_vm();
-    Chunk chunk;
-    chunk_init(&chunk);
+static void repl() {
+    char line[1024] = {0};
+    for (;;) {
+        printf("> ");
+        if (!fgets(line, sizeof(line), stdin)) {
+            printf("\n");
+            break;
+        }
 
-    int constant = chunk_add_constant(&chunk, 1.2);
-    chunk_write(&chunk, OP_CONSTANT, 123);
-    chunk_write(&chunk, constant, 123);
+        interpret(line);
+    }
+}
 
-    chunk_write(&chunk, OP_NEGATE, 123);
+static char* read_file(const char* path) {
+    FILE* file = fopen(path, "rb");
+    if (file == NULL) {
+        fprintf(stderr, "could not open file '%s'\n", path);
+        exit(74);
+    }
 
-    constant = chunk_add_constant(&chunk, 3.14);
-    chunk_write(&chunk, OP_CONSTANT, 123);
-    chunk_write(&chunk, constant, 123);
+    fseek(file, 0L, SEEK_END);
+    size_t file_size = ftell(file);
+    rewind(file);
 
-    chunk_write(&chunk, OP_SUBTRACT, 123);
+    char* buffer = malloc(file_size + 1);
+    if (buffer == NULL) {
+        fprintf(stderr, "not enough memory to read '%s'\n", path);
+        exit(74);
+    }
 
-    constant = chunk_add_constant(&chunk, 5.6);
-    chunk_write(&chunk, OP_CONSTANT, 123);
-    chunk_write(&chunk, constant, 123);
+    size_t bytes_read = fread(buffer, sizeof(char), file_size, file);
+    if (bytes_read < file_size) {
+        fprintf(stderr, "could not read from file '%s'\n", path);
+        exit(74);
+    }
 
-    chunk_write(&chunk, OP_DIVIDE, 123);
+    buffer[bytes_read] = '\0';
 
-    chunk_write(&chunk, OP_RETURN, 123);
+    fclose(file);
+    return buffer;
+}
 
-    printf("\nDebug:\n");
-    disassemble_chunk(&chunk, "test chunk");
+static void run_file(const char* path) {
+    char* source = read_file(path);
+    InterpretResult result = interpret(source);
+    free(source);
 
-    printf("\nRunning:\n");
-    InterpretResult result = interpret(&chunk);
     switch (result) {
-    case INTERPRET_OK: {
-        printf("OK\n");
-        break;
+        case INTERPRET_COMPILE_ERROR:
+            exit(65);
+        case INTERPRET_RUNTIME_ERROR:
+            exit(70);
+        case INTERPRET_OK:
+            break;
     }
-    default: {
-        printf("UNHANDLED INTEPRET RESULT: %d\n", result);
-        exit(1);
-    }
+}
+
+int main(int argc, const char* argv[]) {
+    init_vm();
+
+    if (argc == 1) {
+        repl();
+    } else if (argc == 2) {
+        run_file(argv[1]);
+    } else {
+        fprintf(stderr, "Usage: clox [path]\n");
+        exit(64);
     }
 
-    chunk_free(&chunk);
     free_vm();
     return 0;
 }

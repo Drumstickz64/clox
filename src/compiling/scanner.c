@@ -55,6 +55,46 @@ static bool match(char target) {
     return true;
 }
 
+static char peek() {
+    ASSERT(!isAtEnd(), "peek() will not be called at the end of file");
+
+    return *scanner.curr;
+}
+
+static char peek_next() {
+    if (isAtEnd())
+        return '\0';
+
+    return scanner.curr[1];
+}
+
+static void drop_line() {
+    while (!isAtEnd() && peek() != '\n')
+        advance();
+}
+
+static void skip_whitespace() {
+    for (;;) {
+        char c = peek();
+        switch (c) {
+            case ' ':
+            case '\t':
+                advance();
+                break;
+            case '\n':
+                scanner.line++;
+                advance();
+                break;
+            case '/':
+                if (peek_next() == '/')
+                    drop_line();
+                break;
+            default:
+                return;
+        }
+    }
+}
+
 void scanner_init(const char* source) {
     scanner.start = source;
     scanner.curr = source;
@@ -62,6 +102,7 @@ void scanner_init(const char* source) {
 }
 
 Token scanner_next_token() {
+    skip_whitespace();
     scanner.start = scanner.curr;
 
     if (isAtEnd())

@@ -19,7 +19,8 @@
     "string_view": "c",
     "stdio.h": "c",
     "stddef.h": "c",
-    "chunk.h": "c"
+    "chunk.h": "c",
+    "string.h": "c"
   },
   "cmake.debugConfig": {
     "args": ["${workspaceFolder}/test.lox"]

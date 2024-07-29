@@ -44,6 +44,17 @@ static char advance() {
     return scanner.curr[-1];
 }
 
+static bool match(char target) {
+    if (isAtEnd())
+        return false;
+
+    if (*scanner.curr != target)
+        return false;
+
+    scanner.curr++;
+    return true;
+}
+
 void scanner_init(const char* source) {
     scanner.start = source;
     scanner.curr = source;
@@ -81,6 +92,14 @@ Token scanner_next_token() {
             return make_token(TOKEN_SLASH);
         case '*':
             return make_token(TOKEN_STAR);
+        case '!':
+            return make_token(match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
+        case '=':
+            return make_token(match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
+        case '<':
+            return make_token(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
+        case '>':
+            return make_token(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
     }
 
     return token_error("unexpected character");

@@ -2,6 +2,7 @@
 
 #include "assert.h"
 #include "common.h"
+#include "compiling/compiler.h"
 #include "debug.h"
 #include "vm.h"
 
@@ -76,7 +77,8 @@ void init_vm(void) {
 void free_vm(void) {}
 
 InterpretResult interpret(const char* source) {
-    printf(source);
+    compile(source);
+    return INTERPRET_OK;
 }
 
 void push(Value value) {

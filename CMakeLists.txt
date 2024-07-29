@@ -6,7 +6,11 @@ add_executable(${PROJECT_NAME} "src/main.c"
                                "src/chunk.c"
                                "src/value.c"
                                "src/vm.c"
+                               "src/compiling/scanner.c"
+                               "src/compiling/compiler.c"
                                "src/debug.c")
+
+target_include_directories(${PROJECT_NAME} PRIVATE "src")
 
 if(MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)

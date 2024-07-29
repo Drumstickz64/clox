@@ -1,5 +1,5 @@
 {
-  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
   "files.associations": {
     "JUSTFILE": "makefile",
     "*.lox": "lox",
@@ -20,5 +20,8 @@
     "stdio.h": "c",
     "stddef.h": "c",
     "chunk.h": "c"
+  },
+  "cmake.debugConfig": {
+    "args": ["${workspaceFolder}/test.lox"]
   }
 }

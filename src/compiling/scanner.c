@@ -95,6 +95,20 @@ static void skip_whitespace() {
     }
 }
 
+static Token string() {
+    while (peek() != '"' && !isAtEnd()) {
+        if (peek() == '\n')
+            scanner.line++;
+        advance();
+    }
+
+    if (isAtEnd())
+        return token_error("unterminated string literal");
+
+    advance();  // consume closing "
+    return make_token(TOKEN_STRING);
+}
+
 void scanner_init(const char* source) {
     scanner.start = source;
     scanner.curr = source;
@@ -141,6 +155,8 @@ Token scanner_next_token() {
             return make_token(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
         case '>':
             return make_token(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+        case '"':
+            return string();
     }
 
     return token_error("unexpected character");

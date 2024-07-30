@@ -13,11 +13,15 @@ typedef struct Scanner {
 
 Scanner scanner;
 
-static bool isDigit(char c) {
+static bool is_digit(char c) {
     return c >= '0' && c <= '9';
 }
 
-static bool isAtEnd() {
+static bool is_alpha(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+}
+
+static bool is_at_end() {
     return *scanner.curr == '\0';
 }
 
@@ -49,7 +53,7 @@ static char advance() {
 }
 
 static bool match(char target) {
-    if (isAtEnd())
+    if (is_at_end())
         return false;
 
     if (*scanner.curr != target)
@@ -60,20 +64,18 @@ static bool match(char target) {
 }
 
 static char peek() {
-    ASSERT(!isAtEnd(), "peek() will not be called at the end of file");
-
     return *scanner.curr;
 }
 
 static char peek_next() {
-    if (isAtEnd())
+    if (is_at_end())
         return '\0';
 
     return scanner.curr[1];
 }
 
 static void drop_line() {
-    while (!isAtEnd() && peek() != '\n')
+    while (!is_at_end() && peek() != '\n')
         advance();
 }
 
@@ -82,6 +84,7 @@ static void skip_whitespace() {
         char c = peek();
         switch (c) {
             case ' ':
+            case '\r':
             case '\t':
                 advance();
                 break;
@@ -90,8 +93,11 @@ static void skip_whitespace() {
                 advance();
                 break;
             case '/':
-                if (peek_next() == '/')
+                if (peek_next() == '/') {
                     drop_line();
+                } else {
+                    return;
+                }
                 break;
             default:
                 return;
@@ -100,13 +106,13 @@ static void skip_whitespace() {
 }
 
 static Token string() {
-    while (peek() != '"' && !isAtEnd()) {
+    while (peek() != '"' && !is_at_end()) {
         if (peek() == '\n')
             scanner.line++;
         advance();
     }
 
-    if (isAtEnd())
+    if (is_at_end())
         return token_error("unterminated string literal");
 
     advance();  // consume closing "
@@ -114,17 +120,88 @@ static Token string() {
 }
 
 static Token number() {
-    while (isDigit(peek()))
+    while (is_digit(peek()))
         advance();
 
-    if (peek() == '.' && isDigit(peek_next())) {
+    if (peek() == '.' && is_digit(peek_next())) {
         advance();  // consume the .
 
-        while (isDigit(peek()))
+        while (is_digit(peek()))
             advance();
     }
 
     return make_token(TOKEN_NUMBER);
+}
+
+static TokenType check_keyword(size_t span_start,
+                               size_t span_len,
+                               const char* rest,
+                               TokenType type) {
+    size_t word_len = scanner.curr - scanner.start;
+    if (span_start + span_len == word_len &&
+        memcmp(scanner.start + span_start, rest, span_len) == 0) {
+        return type;
+    }
+
+    return TOKEN_IDENTIFIER;
+}
+
+static TokenType identifier_type() {
+    switch (scanner.start[0]) {
+        case 'a':
+            return check_keyword(1, 2, "nd", TOKEN_AND);
+        case 'c':
+            return check_keyword(1, 4, "lass", TOKEN_CLASS);
+        case 'e':
+            return check_keyword(1, 3, "lse", TOKEN_ELSE);
+        case 'i':
+            return check_keyword(1, 1, "f", TOKEN_IF);
+        case 'n':
+            return check_keyword(1, 2, "il", TOKEN_NIL);
+        case 'o':
+            return check_keyword(1, 1, "r", TOKEN_OR);
+        case 'p':
+            return check_keyword(1, 4, "rint", TOKEN_PRINT);
+        case 'r':
+            return check_keyword(1, 5, "eturn", TOKEN_RETURN);
+        case 's':
+            return check_keyword(1, 4, "uper", TOKEN_SUPER);
+        case 'v':
+            return check_keyword(1, 2, "ar", TOKEN_VAR);
+        case 'w':
+            return check_keyword(1, 4, "hile", TOKEN_WHILE);
+        case 'f':
+            if (scanner.curr - scanner.start > 1) {
+                switch (scanner.start[1]) {
+                    case 'a':
+                        return check_keyword(2, 3, "lse", TOKEN_FALSE);
+                    case 'o':
+                        return check_keyword(2, 1, "r", TOKEN_FOR);
+                    case 'u':
+                        return check_keyword(2, 1, "n", TOKEN_FUN);
+                }
+            }
+            break;
+        case 't':
+            if (scanner.curr - scanner.start > 1) {
+                switch (scanner.start[1]) {
+                    case 'h':
+                        return check_keyword(2, 2, "is", TOKEN_THIS);
+                    case 'r':
+                        return check_keyword(2, 2, "ue", TOKEN_TRUE);
+                }
+            }
+            break;
+    }
+
+    return TOKEN_IDENTIFIER;
+}
+
+static Token identifier() {
+    while (is_alpha(peek()) || is_digit(peek()))
+        advance();
+
+    return make_token(identifier_type());
 }
 
 void scanner_init(const char* source) {
@@ -137,12 +214,16 @@ Token scanner_next_token() {
     skip_whitespace();
     scanner.start = scanner.curr;
 
-    if (isAtEnd())
+    if (is_at_end())
         return make_token(TOKEN_EOF);
 
     char c = advance();
-    if (isDigit(c))
+
+    if (is_digit(c))
         return number();
+
+    if (is_alpha(c))
+        return identifier();
 
     switch (c) {
         case '(':

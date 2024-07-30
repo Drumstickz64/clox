@@ -13,6 +13,10 @@ typedef struct Scanner {
 
 Scanner scanner;
 
+static bool isDigit(char c) {
+    return c >= '0' && c <= '9';
+}
+
 static bool isAtEnd() {
     return *scanner.curr == '\0';
 }
@@ -109,6 +113,20 @@ static Token string() {
     return make_token(TOKEN_STRING);
 }
 
+static Token number() {
+    while (isDigit(peek()))
+        advance();
+
+    if (peek() == '.' && isDigit(peek_next())) {
+        advance();  // consume the .
+
+        while (isDigit(peek()))
+            advance();
+    }
+
+    return make_token(TOKEN_NUMBER);
+}
+
 void scanner_init(const char* source) {
     scanner.start = source;
     scanner.curr = source;
@@ -123,6 +141,8 @@ Token scanner_next_token() {
         return make_token(TOKEN_EOF);
 
     char c = advance();
+    if (isDigit(c))
+        return number();
 
     switch (c) {
         case '(':

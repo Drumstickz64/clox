@@ -21,7 +21,7 @@ static bool is_alpha(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
-static bool is_at_end() {
+static bool is_at_end(void) {
     return *scanner.curr == '\0';
 }
 
@@ -47,7 +47,7 @@ static Token token_error(const char* msg) {
     return token;
 }
 
-static char advance() {
+static char advance(void) {
     scanner.curr++;
     return scanner.curr[-1];
 }
@@ -63,23 +63,23 @@ static bool match(char target) {
     return true;
 }
 
-static char peek() {
+static char peek(void) {
     return *scanner.curr;
 }
 
-static char peek_next() {
+static char peek_next(void) {
     if (is_at_end())
         return '\0';
 
     return scanner.curr[1];
 }
 
-static void drop_line() {
+static void drop_line(void) {
     while (!is_at_end() && peek() != '\n')
         advance();
 }
 
-static void skip_whitespace() {
+static void skip_whitespace(void) {
     for (;;) {
         char c = peek();
         switch (c) {
@@ -105,7 +105,7 @@ static void skip_whitespace() {
     }
 }
 
-static Token string() {
+static Token string(void) {
     while (peek() != '"' && !is_at_end()) {
         if (peek() == '\n')
             scanner.line++;
@@ -119,7 +119,7 @@ static Token string() {
     return make_token(TOKEN_STRING);
 }
 
-static Token number() {
+static Token number(void) {
     while (is_digit(peek()))
         advance();
 
@@ -146,7 +146,7 @@ static TokenType check_keyword(size_t span_start,
     return TOKEN_IDENTIFIER;
 }
 
-static TokenType identifier_type() {
+static TokenType identifier_type(void) {
     switch (scanner.start[0]) {
         case 'a':
             return check_keyword(1, 2, "nd", TOKEN_AND);
@@ -197,7 +197,7 @@ static TokenType identifier_type() {
     return TOKEN_IDENTIFIER;
 }
 
-static Token identifier() {
+static Token identifier(void) {
     while (is_alpha(peek()) || is_digit(peek()))
         advance();
 
@@ -210,7 +210,7 @@ void scanner_init(const char* source) {
     scanner.line = 1;
 }
 
-Token scanner_next_token() {
+Token scanner_next_token(void) {
     skip_whitespace();
     scanner.start = scanner.curr;
 

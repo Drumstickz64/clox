@@ -86,7 +86,7 @@ void push(Value value) {
     *vm.stack_top = value;
     vm.stack_top++;
 }
-Value pop() {
+Value pop(void) {
     ASSERT(vm.stack_top != vm.stack, "the stack is not empty");
     vm.stack_top--;
     Value value = *vm.stack_top;

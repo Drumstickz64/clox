@@ -77,8 +77,21 @@ void init_vm(void) {
 void free_vm(void) {}
 
 InterpretResult interpret(const char* source) {
-    compile(source);
-    return INTERPRET_OK;
+    Chunk chunk;
+    chunk_init(&chunk);
+
+    if (!compile(source, &chunk)) {
+        chunk_free(&chunk);
+        return INTERPRET_COMPILE_ERROR;
+    }
+
+    vm.chunk = &chunk;
+    vm.ip = vm.chunk->code;
+
+    InterpretResult result = run();
+
+    chunk_free(&chunk);
+    return result;
 }
 
 void push(Value value) {

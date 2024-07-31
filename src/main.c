@@ -5,6 +5,7 @@
 #include "assert.h"
 #include "chunk.h"
 #include "common.h"
+#include "compiling/scanner.h"
 #include "debug.h"
 #include "vm.h"
 
@@ -65,6 +66,28 @@ static void run_file(const char* path) {
     }
 }
 
+static void test_scanning(const char* path) {
+    char* source = read_file(path);
+
+    scanner_init(source);
+    int32_t line = -1;
+    for (;;) {
+        Token token = scanner_next_token();
+        if (token.line != line) {
+            printf("%4d ", token.line);
+            line = token.line;
+        } else {
+            printf("   | ");
+        }
+
+        printf("%2d '%.*s'\n", token.type, token.length, token.start);
+
+        if (token.type == TOKEN_EOF)
+            break;
+    }
+    free(source);
+}
+
 int main(int argc, const char* argv[]) {
     init_vm();
 
@@ -72,8 +95,10 @@ int main(int argc, const char* argv[]) {
         repl();
     } else if (argc == 2) {
         run_file(argv[1]);
+    } else if ((argc == 3) && (strcmp(argv[2], "scan") == 0)) {
+        test_scanning(argv[1]);
     } else {
-        fprintf(stderr, "Usage: clox [path]\n");
+        fprintf(stderr, "Usage: clox [path] [scan]\n");
         exit(64);
     }
 

@@ -20,7 +20,8 @@
     "stdio.h": "c",
     "stddef.h": "c",
     "chunk.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "compiler.h": "c"
   },
   "cmake.debugConfig": {
     "args": ["${workspaceFolder}/test.lox"]

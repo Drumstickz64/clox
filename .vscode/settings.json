@@ -22,8 +22,5 @@
     "chunk.h": "c",
     "string.h": "c",
     "compiler.h": "c"
-  },
-  "cmake.debugConfig": {
-    "args": ["${workspaceFolder}/test.lox"]
   }
 }

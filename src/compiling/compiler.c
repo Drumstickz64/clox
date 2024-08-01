@@ -11,6 +11,20 @@ typedef struct Parser {
     bool is_panicing;
 } Parser;
 
+typedef enum Precedence {
+    PREC_NONE,
+    PREC_ASSIGNMENT,  // =
+    PREC_OR,          // or
+    PREC_AND,         // and
+    PREC_EQUALITY,    // == !=
+    PREC_COMPARISON,  // < > <= >=
+    PREC_TERM,        // + -
+    PREC_FACTOR,      // * /
+    PREC_UNARY,       // ! -
+    PREC_CALL,        // . ()
+    PREC_PRIMARY
+} Precedence;
+
 Parser parser = {0};
 Chunk* compiling_chunk = {0};
 
@@ -93,6 +107,8 @@ static void advance(void) {
     }
 }
 
+static void expression(void);
+
 static void consume(TokenType type, const char* msg) {
     if (parser.curr_token.type == type) {
         advance();
@@ -104,6 +120,31 @@ static void consume(TokenType type, const char* msg) {
 static void number(void) {
     Value value = strtod(parser.curr_token.start, NULL);
     emit_constant(value);
+}
+
+static void grouping(void) {
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "expected ')' after expression");
+}
+
+static void unary(void) {
+    TokenType operator= parser.prev_token.type;
+
+    parse_precedence(PREC_UNARY);
+
+    switch (operator) {
+        case TOKEN_MINUS:
+            emit_byte(OP_NEGATE);
+            break;
+        default:
+            return;
+    }
+}
+
+static void parse_precedence(Precedence precedence) {}
+
+static void expression() {
+    parse_precedence(PREC_ASSIGNMENT);
 }
 #pragma endregion
 

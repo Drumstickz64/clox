@@ -10,7 +10,9 @@ add_executable(${PROJECT_NAME} "src/main.c"
                                "src/compiling/compiler.c"
                                "src/debug.c")
 
-target_include_directories(${PROJECT_NAME} PRIVATE "src")
+target_include_directories(${PROJECT_NAME} PRIVATE "src" "${PROJECT_BINARY_DIR}/src")
+
+configure_file("src/config.h.in" "src/config.h")
 
 if(MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)

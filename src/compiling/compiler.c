@@ -3,6 +3,7 @@
 #include "assert.h"
 #include "common.h"
 #include "compiler.h"
+#include "config.h"
 #include "scanner.h"
 
 #ifdef DEBUG_TRACE_CODE
@@ -44,6 +45,7 @@ static void expression(void);
 static void binary(void);
 static void unary(void);
 static void grouping(void);
+static void literal(void);
 static void number(void);
 
 ParseRule rules[] = {
@@ -72,17 +74,17 @@ ParseRule rules[] = {
     [TOKEN_AND] = {NULL, NULL, PREC_NONE},
     [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
-    [TOKEN_FALSE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
     [TOKEN_FUN] = {NULL, NULL, PREC_NONE},
     [TOKEN_IF] = {NULL, NULL, PREC_NONE},
-    [TOKEN_NIL] = {NULL, NULL, PREC_NONE},
+    [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_OR] = {NULL, NULL, PREC_NONE},
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
     [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
     [TOKEN_THIS] = {NULL, NULL, PREC_NONE},
-    [TOKEN_TRUE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
     [TOKEN_ERROR] = {NULL, NULL, PREC_NONE},
@@ -251,9 +253,25 @@ static void grouping(void) {
     consume(TOKEN_RIGHT_PAREN, "expected ')' after expression");
 }
 
+static void literal(void) {
+    switch (parser.prev_token.type) {
+        case TOKEN_NIL:
+            emit_byte(OP_NIL);
+            break;
+        case TOKEN_TRUE:
+            emit_byte(OP_TRUE);
+            break;
+        case TOKEN_FALSE:
+            emit_byte(OP_FALSE);
+            break;
+        default:
+            UNREACHABLE("encountered an invalid character in literal function");
+    }
+}
+
 static void number(void) {
-    Value value = strtod(parser.prev_token.start, NULL);
-    emit_constant(value);
+    double value = strtod(parser.prev_token.start, NULL);
+    emit_constant(NUMBER_VAL(value));
 }
 #pragma endregion
 

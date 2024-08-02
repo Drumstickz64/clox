@@ -1,1 +1,2 @@
-scan
+cmake:
+lox: scan

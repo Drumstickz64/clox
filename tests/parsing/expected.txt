@@ -1,0 +1,18 @@
+== code ==
+0000    1 OP_CONSTANT         0 '1'
+0002    | OP_CONSTANT         1 '2'
+0004    | OP_CONSTANT         2 '3'
+0006    | OP_MULTIPLY
+0007    | OP_CONSTANT         3 '4'
+0009    | OP_MULTIPLY
+0010    | OP_ADD
+0011    | OP_CONSTANT         4 '56'
+0013    | OP_ADD
+0014    | OP_CONSTANT         5 '4'
+0016    | OP_NEGATE
+0017    | OP_SUBTRACT
+0018    | OP_CONSTANT         6 '5'
+0020    | OP_NEGATE
+0021    | OP_SUBTRACT
+0022    | OP_RETURN
+90

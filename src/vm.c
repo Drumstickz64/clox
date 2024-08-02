@@ -19,6 +19,10 @@ static Value peek(size_t distance) {
     return vm.stack_top[-1 - distance];
 }
 
+static bool is_falsy(Value value) {
+    return IS_NIL(value) || (IS_BOOL(value) && AS_BOOL(value));
+}
+
 static void runtime_error(const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -54,13 +58,16 @@ static InterpretResult run(void) {
 
     for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
-        printf("          ");
-        for (Value* slot = vm.stack; slot < vm.stack_top; slot++) {
-            printf("[ ");
-            value_print(*slot);
-            printf(" ]");
+        if (vm.stack_top != vm.stack) {
+            printf("          ");
+            for (Value* slot = vm.stack; slot < vm.stack_top; slot++) {
+                printf("[ ");
+                value_print(*slot);
+                printf(" ]");
+            }
+            printf("\n");
         }
-        printf("\n");
+
         disassemble_instruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
 #endif
 
@@ -94,6 +101,9 @@ static InterpretResult run(void) {
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
             }
+            case OP_NOT:
+                push(BOOL_VAL(!is_falsy(pop())));
+                break;
             case OP_ADD:
                 BINARY_OP(NUMBER_VAL, +);
                 break;

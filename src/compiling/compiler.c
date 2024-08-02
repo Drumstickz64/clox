@@ -60,7 +60,7 @@ ParseRule rules[] = {
     [TOKEN_SEMICOLON] = {NULL, NULL, PREC_NONE},
     [TOKEN_SLASH] = {NULL, binary, PREC_FACTOR},
     [TOKEN_STAR] = {NULL, binary, PREC_FACTOR},
-    [TOKEN_BANG] = {NULL, NULL, PREC_NONE},
+    [TOKEN_BANG] = {unary, NULL, PREC_NONE},
     [TOKEN_BANG_EQUAL] = {NULL, NULL, PREC_NONE},
     [TOKEN_EQUAL] = {NULL, NULL, PREC_NONE},
     [TOKEN_EQUAL_EQUAL] = {NULL, NULL, PREC_NONE},
@@ -227,9 +227,7 @@ static void binary(void) {
             emit_byte(OP_DIVIDE);
             break;
         default: {
-            UNREACHABLE(
-                "encountered invalid binary operator in binary parsing "
-                "function");
+            UNREACHABLE("encountered invalid binary operator");
         }
     }
 }
@@ -243,8 +241,11 @@ static void unary(void) {
         case TOKEN_MINUS:
             emit_byte(OP_NEGATE);
             break;
+        case TOKEN_BANG:
+            emit_byte(OP_NOT);
+            break;
         default:
-            return;
+            UNREACHABLE("encountered invalid unary operator")
     }
 }
 

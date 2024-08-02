@@ -1,0 +1,6 @@
+0000    1 OP_NIL
+          [ nil ]
+0001    | OP_NOT
+          [ false ]
+0002    | OP_RETURN
+false

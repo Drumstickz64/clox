@@ -1,2 +1,2 @@
-cmake:
+cmake: -DDEBUG_TRACE_EXECUTION=OFF -DDEBUG_TRACE_CODE=OFF
 lox: scan

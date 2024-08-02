@@ -1,18 +1,32 @@
-== code ==
 0000    1 OP_CONSTANT         0 '1'
+          [ 1 ]
 0002    | OP_CONSTANT         1 '2'
+          [ 1 ][ 2 ]
 0004    | OP_CONSTANT         2 '3'
+          [ 1 ][ 2 ][ 3 ]
 0006    | OP_MULTIPLY
+          [ 1 ][ 6 ]
 0007    | OP_CONSTANT         3 '4'
+          [ 1 ][ 6 ][ 4 ]
 0009    | OP_MULTIPLY
+          [ 1 ][ 24 ]
 0010    | OP_ADD
+          [ 25 ]
 0011    | OP_CONSTANT         4 '56'
+          [ 25 ][ 56 ]
 0013    | OP_ADD
+          [ 81 ]
 0014    | OP_CONSTANT         5 '4'
+          [ 81 ][ 4 ]
 0016    | OP_NEGATE
+          [ 81 ][ -4 ]
 0017    | OP_SUBTRACT
+          [ 85 ]
 0018    | OP_CONSTANT         6 '5'
+          [ 85 ][ 5 ]
 0020    | OP_NEGATE
+          [ 85 ][ -5 ]
 0021    | OP_SUBTRACT
+          [ 90 ]
 0022    | OP_RETURN
 90

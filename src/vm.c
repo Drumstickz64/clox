@@ -78,6 +78,18 @@ static InterpretResult run(void) {
                 printf("\n");
                 return INTERPRET_OK;
             }
+            case OP_EQUAL: {
+                Value b = pop();
+                Value a = pop();
+                push(BOOL_VAL(values_equal(a, b)));
+                break;
+            }
+            case OP_GREATER:
+                BINARY_OP(BOOL_VAL, >);
+                break;
+            case OP_LESS:
+                BINARY_OP(BOOL_VAL, <);
+                break;
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
                 push(constant);

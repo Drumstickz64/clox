@@ -15,6 +15,9 @@ typedef enum OpCode {
     OP_SUBTRACT,
     OP_MULTIPLY,
     OP_DIVIDE,
+    OP_EQUAL,
+    OP_GREATER,
+    OP_LESS,
     OP_RETURN,
 } OpCode;
 

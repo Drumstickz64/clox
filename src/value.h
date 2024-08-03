@@ -39,5 +39,6 @@ void value_array_free(ValueArray* value_array);
 void value_array_write(ValueArray* value_array, Value value);
 Value value_get(ValueArray* array, uint8_t i);
 void value_print(Value value);
+bool values_equal(Value a, Value b);
 
 #endif

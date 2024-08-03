@@ -7,18 +7,19 @@ add_executable(${PROJECT_NAME} "src/main.c"
                                "src/value.c"
                                "src/vm.c"
                                "src/compiling/scanner.c"
+                               
                                "src/compiling/compiler.c"
                                "src/debug.c")
 
 target_include_directories(${PROJECT_NAME} PRIVATE "src" "${PROJECT_BINARY_DIR}/src")
 
-option(DEBUG_TRACE_CODE OFF)
-option(DEBUG_TRACE_EXECUTION OFF)
+option(DEBUG_TRACE_CODE ON)
+option(DEBUG_TRACE_EXECUTION ON)
 
 configure_file("src/config.h.in" "src/config.h")
 
 if(MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+  target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 else()
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic --pedantic-errors)
 endif()

@@ -1,0 +1,8 @@
+0000    1 OP_CONSTANT         0 'abc'
+          [ abc ]
+0002    | OP_CONSTANT         1 'def'
+          [ abc ][ def ]
+0004    | OP_ADD
+          [ abcdef ]
+0005    | OP_RETURN
+abcdef

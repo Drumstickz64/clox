@@ -7,8 +7,8 @@ add_executable(${PROJECT_NAME} "src/main.c"
                                "src/value.c"
                                "src/vm.c"
                                "src/compiling/scanner.c"
-                               
                                "src/compiling/compiler.c"
+                               "src/object.c"
                                "src/debug.c")
 
 target_include_directories(${PROJECT_NAME} PRIVATE "src" "${PROJECT_BINARY_DIR}/src")

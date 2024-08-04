@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "assert.h"
 #include "memory.h"
+#include "object.h"
 #include "value.h"
 
 void value_array_init(ValueArray* array) {
@@ -44,6 +46,9 @@ void value_print(Value value) {
         case VAL_BOOL:
             printf(AS_BOOL(value) ? "true" : "false");
             break;
+        case VAL_OBJ:
+            obj_print(value);
+            break;
     }
 }
 
@@ -58,6 +63,13 @@ bool values_equal(Value a, Value b) {
             return AS_BOOL(a) == AS_BOOL(b);
         case VAL_NUMBER:
             return AS_NUMBER(a) == AS_NUMBER(b);
+        case VAL_OBJ: {
+            ObjString* string_a = AS_STRING(a);
+            ObjString* string_b = AS_STRING(b);
+
+            return string_a->len == string_b->len &&
+                   (memcmp(string_a, string_b, string_a->len) == 0);
+        }
 
         default:
             UNREACHABLE("could not handle value equality");

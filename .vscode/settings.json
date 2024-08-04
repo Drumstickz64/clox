@@ -21,6 +21,15 @@
     "stddef.h": "c",
     "chunk.h": "c",
     "string.h": "c",
-    "compiler.h": "c"
+    "compiler.h": "c",
+    "value.h": "c",
+    "object.h": "c",
+    "optional": "c",
+    "system_error": "c",
+    "functional": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "utility": "c",
+    "config.h": "c"
   }
 }

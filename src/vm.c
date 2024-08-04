@@ -1,11 +1,14 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "assert.h"
 #include "common.h"
 #include "compiling/compiler.h"
 #include "config.h"
 #include "debug.h"
+#include "memory.h"
+#include "object.h"
 #include "value.h"
 #include "vm.h"
 
@@ -21,6 +24,19 @@ static Value peek(size_t distance) {
 
 static bool is_falsy(Value value) {
     return IS_NIL(value) || (IS_BOOL(value) && AS_BOOL(value));
+}
+
+static void concatenate(void) {
+    ObjString* b = AS_STRING(pop());
+    ObjString* a = AS_STRING(pop());
+    int len = a->len + b->len;
+    char* chars = ALLOCATE(char, len + 1);
+    memcpy(chars, a->chars, a->len);
+    memcpy(chars + a->len, b->chars, b->len);
+    chars[len] = '\0';
+
+    ObjString* result = take_string(chars, len);
+    push(OBJ_VAL(result));
 }
 
 static void runtime_error(const char* format, ...) {
@@ -116,9 +132,20 @@ static InterpretResult run(void) {
             case OP_NOT:
                 push(BOOL_VAL(!is_falsy(pop())));
                 break;
-            case OP_ADD:
-                BINARY_OP(NUMBER_VAL, +);
+            case OP_ADD: {
+                if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
+                    concatenate();
+                } else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1))) {
+                    double b = AS_NUMBER(pop());
+                    double a = AS_NUMBER(pop());
+                    push(NUMBER_VAL(a + b));
+                } else {
+                    runtime_error(
+                        "Operands must be two numbers or two strings.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
                 break;
+            }
             case OP_SUBTRACT:
                 BINARY_OP(NUMBER_VAL, -);
                 break;
@@ -138,9 +165,12 @@ static InterpretResult run(void) {
 
 void init_vm(void) {
     reset_stack();
+    vm.objects = NULL;
 }
 
-void free_vm(void) {}
+void free_vm(void) {
+    free_objects();
+}
 
 InterpretResult interpret(const char* source) {
     Chunk chunk;

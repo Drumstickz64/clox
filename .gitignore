@@ -1,3 +1,4 @@
+tmp*
 tests/**/output.txt
 
 # Prerequisites

@@ -16,13 +16,13 @@ cmake --build build
 You need NodeJs to run the integration tests, also make sure to have run CMake configuration
 
 ```shell
-node runTests.mjs <path-to-build-directory> <path-to-binary>
+node runTests.js <path-to-binary-relative-to-build-dir>
 ```
 
 For example:
 
 ```shell
-node runTests.mjs build/gcc/ build/gcc/clox.exe
+node runTests.js clox.exe
 ```
 
 If a test fails, it outputs an `output.txt` in the directory of the failed test for easy diffing

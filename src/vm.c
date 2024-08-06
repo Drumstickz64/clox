@@ -112,7 +112,7 @@ static InterpretResult run(void) {
                 break;
             }
             case OP_NIL:
-                push(NIL_VAL());
+                push(NIL_VAL);
                 break;
             case OP_TRUE:
                 push(BOOL_VAL(true));
@@ -166,9 +166,11 @@ static InterpretResult run(void) {
 void init_vm(void) {
     reset_stack();
     vm.objects = NULL;
+    table_init(&vm.strings);
 }
 
 void free_vm(void) {
+    table_free(&vm.strings);
     free_objects();
 }
 

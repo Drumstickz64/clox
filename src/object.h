@@ -17,6 +17,7 @@ typedef struct ObjString {
     Obj obj;
     int len;
     char* chars;
+    uint32_t hash;
 } ObjString;
 
 #define OBJ_TYPE(value_struct) (AS_OBJ(value_struct)->type)

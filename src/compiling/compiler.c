@@ -15,7 +15,7 @@ typedef struct Parser {
     Token prev_token;
     Token curr_token;
     bool had_error;
-    bool is_panicing;
+    bool is_panicking;
 } Parser;
 
 typedef enum Precedence {
@@ -106,10 +106,10 @@ static Chunk* curr_chunk() {
 }
 
 static void error_at(Token* token, const char* message) {
-    if (parser.is_panicing)
+    if (parser.is_panicking)
         return;
 
-    parser.is_panicing = true;
+    parser.is_panicking = true;
     fprintf(stderr, "[line %d] Error", token->line);
 
     if (token->type == TOKEN_EOF) {
@@ -198,6 +198,32 @@ static bool match(TokenType type) {
     return true;
 }
 
+static void synchronize(void) {
+    parser.is_panicking = false;
+
+    while (parser.curr_token.type != TOKEN_EOF) {
+        if (parser.prev_token.type == TOKEN_SEMICOLON) {
+            return;
+        }
+
+        switch (parser.curr_token.type) {
+            case TOKEN_CLASS:
+            case TOKEN_FUN:
+            case TOKEN_VAR:
+            case TOKEN_FOR:
+            case TOKEN_IF:
+            case TOKEN_WHILE:
+            case TOKEN_PRINT:
+            case TOKEN_RETURN:
+                return;
+
+            default:;  // Do nothing.
+        }
+
+        advance();
+    }
+}
+
 static void consume(TokenType type, const char* msg) {
     if (parser.curr_token.type == type) {
         advance();
@@ -208,6 +234,10 @@ static void consume(TokenType type, const char* msg) {
 
 static void declaration(void) {
     statement();
+
+    if (parser.is_panicking) {
+        synchronize();
+    }
 }
 
 static void statement(void) {

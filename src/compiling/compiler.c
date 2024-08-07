@@ -40,6 +40,11 @@ typedef struct ParseRule {
     Precedence precedence;
 } ParseRule;
 
+static void declaration(void);
+static void statement(void);
+static void print_statement(void);
+static void expression_statement(void);
+
 static void parse_precedence(Precedence precedence);
 
 static void expression(void);
@@ -180,12 +185,49 @@ static void advance(void) {
     }
 }
 
+static bool check(TokenType type) {
+    return type == parser.curr_token.type;
+}
+
+static bool match(TokenType type) {
+    if (!check(type)) {
+        return false;
+    }
+
+    advance();
+    return true;
+}
+
 static void consume(TokenType type, const char* msg) {
     if (parser.curr_token.type == type) {
         advance();
     } else {
         error_at_curr(msg);
     }
+}
+
+static void declaration(void) {
+    statement();
+}
+
+static void statement(void) {
+    if (match(TOKEN_PRINT)) {
+        print_statement();
+    } else {
+        expression_statement();
+    }
+}
+
+static void print_statement(void) {
+    expression();
+    consume(TOKEN_SEMICOLON, "expected ';' after value");
+    emit_byte(OP_PRINT);
+}
+
+static void expression_statement(void) {
+    expression();
+    consume(TOKEN_SEMICOLON, "expected ';' after expression");
+    emit_byte(OP_POP);
 }
 
 static void parse_precedence(Precedence precedence) {
@@ -306,9 +348,11 @@ bool compile(const char* source, Chunk* chunk) {
     compiling_chunk = chunk;
 
     advance();
-    expression();
 
-    consume(TOKEN_EOF, "expected end of expression");
+    while (!match(TOKEN_EOF)) {
+        declaration();
+    }
+
     end_compiler();
 
     return !parser.had_error;

@@ -18,6 +18,8 @@ typedef enum OpCode {
     OP_EQUAL,
     OP_GREATER,
     OP_LESS,
+    OP_POP,
+    OP_PRINT,
     OP_RETURN,
 } OpCode;
 

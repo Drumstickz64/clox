@@ -90,10 +90,17 @@ static InterpretResult run(void) {
         uint8_t instruction;
         switch (instruction = READ_BYTE()) {
             case OP_RETURN: {
-                value_print(pop());
-                printf("\n");
+                // exit the interpreter
                 return INTERPRET_OK;
             }
+            case OP_PRINT: {
+                value_print(pop());
+                printf("\n");
+                break;
+            }
+            case OP_POP:
+                pop();
+                break;
             case OP_EQUAL: {
                 Value b = pop();
                 Value a = pop();

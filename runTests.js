@@ -53,10 +53,11 @@ async function runTest(test, failedTests) {
   await configure(test, cmakeArgs, tmpDir);
   await build(test, tmpDir);
   const output = (await run(test, loxArgs, tmpDir)).stdout;
-  const result = output == expected ? "OK" : "FAILED";
+  const isMatch = output.trim() == expected.trim();
+  const result = isMatch ? "OK" : "FAILED";
   console.log(`test '${test}' ... ${result}`);
 
-  if (output != expected) {
+  if (!isMatch) {
     failedTests.push({
       name: test,
       output,

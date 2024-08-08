@@ -30,5 +30,6 @@
           [ true ]
 0019    | OP_NOT
           [ false ]
-0020    | OP_RETURN
+0020    | OP_PRINT
 false
+0021    | OP_RETURN

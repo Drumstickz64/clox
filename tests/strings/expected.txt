@@ -4,5 +4,6 @@
           [ abc ][ def ]
 0004    | OP_ADD
           [ abcdef ]
-0005    | OP_RETURN
+0005    | OP_PRINT
 abcdef
+0006    | OP_RETURN

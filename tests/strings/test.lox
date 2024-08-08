@@ -1,1 +1,1 @@
-"abc" + "def"
+print "abc" + "def";

@@ -8,5 +8,6 @@
           [ abcdef ][ abcdef ]
 0007    | OP_EQUAL
           [ true ]
-0008    | OP_RETURN
+0008    | OP_PRINT
 true
+0009    | OP_RETURN

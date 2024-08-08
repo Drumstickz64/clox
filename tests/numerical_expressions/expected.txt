@@ -28,5 +28,6 @@
           [ 85 ][ -5 ]
 0021    | OP_SUBTRACT
           [ 90 ]
-0022    | OP_RETURN
+0022    | OP_PRINT
 90
+0023    | OP_RETURN

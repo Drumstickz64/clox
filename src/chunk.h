@@ -19,6 +19,9 @@ typedef enum OpCode {
     OP_GREATER,
     OP_LESS,
     OP_POP,
+    OP_GET_GLOBAL,
+    OP_SET_GLOBAL,
+    OP_DEFINE_GLOBAL,
     OP_PRINT,
     OP_RETURN,
 } OpCode;

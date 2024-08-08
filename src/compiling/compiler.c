@@ -32,7 +32,7 @@ typedef enum Precedence {
     PREC_PRIMARY
 } Precedence;
 
-typedef void (*ParseFn)();
+typedef void (*ParseFn)(bool can_assign);
 
 typedef struct ParseRule {
     ParseFn prefix;
@@ -41,6 +41,7 @@ typedef struct ParseRule {
 } ParseRule;
 
 static void declaration(void);
+static void var_declaration(void);
 static void statement(void);
 static void print_statement(void);
 static void expression_statement(void);
@@ -48,12 +49,13 @@ static void expression_statement(void);
 static void parse_precedence(Precedence precedence);
 
 static void expression(void);
-static void binary(void);
-static void unary(void);
-static void grouping(void);
-static void literal(void);
-static void number(void);
-static void string(void);
+static void binary(bool can_assign);
+static void unary(bool can_assign);
+static void grouping(bool can_assign);
+static void variable(bool can_assign);
+static void literal(bool can_assign);
+static void number(bool can_assign);
+static void string(bool can_assign);
 
 ParseRule rules[] = {
     [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
@@ -75,7 +77,7 @@ ParseRule rules[] = {
     [TOKEN_GREATER_EQUAL] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
-    [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
+    [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, NULL, PREC_NONE},
@@ -233,11 +235,42 @@ static void consume(TokenType type, const char* msg) {
 }
 
 static void declaration(void) {
-    statement();
+    if (match(TOKEN_VAR)) {
+        var_declaration();
+    } else {
+        statement();
+    }
 
     if (parser.is_panicking) {
         synchronize();
     }
+}
+
+static uint8_t identifier_constant(Token* token) {
+    return make_constant(OBJ_VAL(copy_string(token->start, token->length)));
+}
+
+static uint8_t parse_variable(const char* err_msg) {
+    consume(TOKEN_IDENTIFIER, err_msg);
+    return identifier_constant(&parser.prev_token);
+}
+
+static void define_variable(uint8_t global) {
+    emit_byte2(OP_DEFINE_GLOBAL, global);
+}
+
+static void var_declaration(void) {
+    uint8_t global = parse_variable("expected variable name");
+
+    if (match(TOKEN_EQUAL)) {
+        expression();
+    } else {
+        emit_byte(OP_NIL);
+    }
+
+    consume(TOKEN_SEMICOLON, "expected ';' at end of variable declaration");
+
+    define_variable(global);
 }
 
 static void statement(void) {
@@ -268,13 +301,18 @@ static void parse_precedence(Precedence precedence) {
         return;
     }
 
-    prefix_rule();
+    bool can_assign = precedence <= PREC_ASSIGNMENT;
+    prefix_rule(can_assign);
 
     while (precedence <= rules[parser.curr_token.type].precedence) {
         advance();
         ParseFn infix_rule = rules[parser.prev_token.type].infix;
         ASSERT(infix_rule != NULL, "");
-        infix_rule();
+        infix_rule(can_assign);
+    }
+
+    if (can_assign && match(TOKEN_EQUAL)) {
+        error("invalid assignment target");
     }
 }
 
@@ -282,7 +320,7 @@ static void expression() {
     parse_precedence(PREC_ASSIGNMENT);
 }
 
-static void binary(void) {
+static void binary(bool) {
     TokenType operatorType = parser.prev_token.type;
     ParseRule* rule = &rules[operatorType];
     parse_precedence((Precedence)(rule->precedence + 1));
@@ -324,7 +362,7 @@ static void binary(void) {
     }
 }
 
-static void unary(void) {
+static void unary(bool) {
     TokenType operatorType = parser.prev_token.type;
 
     parse_precedence(PREC_UNARY);
@@ -341,12 +379,27 @@ static void unary(void) {
     }
 }
 
-static void grouping(void) {
+static void grouping(bool) {
     expression();
     consume(TOKEN_RIGHT_PAREN, "expected ')' after expression");
 }
 
-static void literal(void) {
+static void named_variable(Token* token, bool can_assign) {
+    uint8_t arg = identifier_constant(token);
+
+    if (can_assign && match(TOKEN_EQUAL)) {
+        expression();
+        emit_byte2(OP_SET_GLOBAL, arg);
+    } else {
+        emit_byte2(OP_GET_GLOBAL, arg);
+    }
+}
+
+static void variable(bool can_assign) {
+    named_variable(&parser.prev_token, can_assign);
+}
+
+static void literal(bool) {
     switch (parser.prev_token.type) {
         case TOKEN_NIL:
             emit_byte(OP_NIL);
@@ -362,12 +415,12 @@ static void literal(void) {
     }
 }
 
-static void number(void) {
+static void number(bool) {
     double value = strtod(parser.prev_token.start, NULL);
     emit_constant(NUMBER_VAL(value));
 }
 
-static void string(void) {
+static void string(bool) {
     emit_constant(OBJ_VAL(copy_string(parser.prev_token.start + 1,
                                       parser.prev_token.length - 2)));
 }

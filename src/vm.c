@@ -55,6 +55,7 @@ static void runtime_error(const char* format, ...) {
 static InterpretResult run(void) {
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (value_get(&vm.chunk->constants, READ_BYTE()))
+#define READ_STRING() (AS_STRING(READ_CONSTANT()))
 #define BINARY_OP(value_type, op)                                            \
     do {                                                                     \
         if (!IS_NUMBER(peek(1))) {                                           \
@@ -101,6 +102,33 @@ static InterpretResult run(void) {
             case OP_POP:
                 pop();
                 break;
+            case OP_GET_GLOBAL: {
+                ObjString* name = READ_STRING();
+                Value value;
+                if (!table_get(&vm.globals, name, &value)) {
+                    runtime_error("undefined variable: '%s'", name->chars);
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                push(value);
+                break;
+            }
+            case OP_SET_GLOBAL: {
+                ObjString* name = READ_STRING();
+                if (table_set(&vm.globals, name, peek(0))) {
+                    table_delete(&vm.globals, name);
+                    runtime_error("undefined variable: '%s'", name->chars);
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                break;
+            }
+            case OP_DEFINE_GLOBAL: {
+                ObjString* name = READ_STRING();
+                table_set(&vm.globals, name, peek(0));
+                pop();
+                break;
+            }
             case OP_EQUAL: {
                 Value b = pop();
                 Value a = pop();
@@ -167,16 +195,19 @@ static InterpretResult run(void) {
 
 #undef READ_BYTE
 #undef READ_CONSTANT
+#undef READ_STRING
 #undef BINARY_OP
 }
 
 void init_vm(void) {
     reset_stack();
     vm.objects = NULL;
+    table_init(&vm.globals);
     table_init(&vm.strings);
 }
 
 void free_vm(void) {
+    table_free(&vm.globals);
     table_free(&vm.strings);
     free_objects();
 }

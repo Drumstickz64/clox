@@ -13,6 +13,7 @@ typedef struct VM {
     Value stack[STACK_MAX];
     Value* stack_top;
     Obj* objects;
+    Table globals;
     Table strings;
 } VM;
 

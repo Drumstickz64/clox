@@ -30,6 +30,9 @@
     "tuple": "c",
     "type_traits": "c",
     "utility": "c",
-    "config.h": "c"
+    "config.h": "c",
+    "atomic": "c",
+    "memory_resource": "c",
+    "initializer_list": "c"
   }
 }

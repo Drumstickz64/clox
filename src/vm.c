@@ -23,7 +23,7 @@ static Value peek(size_t distance) {
 }
 
 static bool is_falsy(Value value) {
-    return IS_NIL(value) || (IS_BOOL(value) && AS_BOOL(value));
+    return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
 
 static void concatenate(void) {
@@ -179,7 +179,7 @@ static InterpretResult run(void) {
                 break;
             }
             case OP_NOT:
-                push(BOOL_VAL(!is_falsy(pop())));
+                push(BOOL_VAL(is_falsy(pop())));
                 break;
             case OP_ADD: {
                 if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {

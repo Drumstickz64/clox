@@ -15,21 +15,21 @@
 0011    | OP_NIL
           [ false ][ nil ]
 0012    | OP_NOT
-          [ false ][ false ]
+          [ false ][ true ]
 0013    | OP_EQUAL
-          [ true ]
-0014    | OP_FALSE
-          [ true ][ false ]
-0015    | OP_NOT
-          [ true ][ true ]
-0016    | OP_EQUAL
-          [ true ]
-0017    | OP_TRUE
-          [ true ][ true ]
-0018    | OP_EQUAL
-          [ true ]
-0019    | OP_NOT
           [ false ]
+0014    | OP_FALSE
+          [ false ][ false ]
+0015    | OP_NOT
+          [ false ][ true ]
+0016    | OP_EQUAL
+          [ false ]
+0017    | OP_TRUE
+          [ false ][ true ]
+0018    | OP_EQUAL
+          [ false ]
+0019    | OP_NOT
+          [ true ]
 0020    | OP_PRINT
-false
+true
 0021    | OP_RETURN

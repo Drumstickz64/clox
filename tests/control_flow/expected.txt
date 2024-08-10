@@ -1,0 +1,37 @@
+0000    1 OP_TRUE
+          [ true ]
+0001    | OP_JUMP_IF_FALSE    1 -> 11
+          [ true ]
+0004    | OP_POP
+0005    | OP_CONSTANT         0 'bare if true'
+          [ bare if true ]
+0007    | OP_PRINT
+bare if true
+0008    | OP_JUMP             8 -> 12
+0012    3 OP_FALSE
+          [ false ]
+0013    | OP_JUMP_IF_FALSE   13 -> 23
+          [ false ]
+0023    | OP_POP
+0024    5 OP_TRUE
+          [ true ]
+0025    | OP_JUMP_IF_FALSE   25 -> 35
+          [ true ]
+0028    | OP_POP
+0029    6 OP_CONSTANT         2 'ifelse true then'
+          [ ifelse true then ]
+0031    | OP_PRINT
+ifelse true then
+0032    7 OP_JUMP            32 -> 39
+0039   11 OP_TRUE
+          [ true ]
+0040    | OP_NOT
+          [ false ]
+0041    | OP_JUMP_IF_FALSE   41 -> 51
+          [ false ]
+0051    | OP_POP
+0052   14 OP_CONSTANT         5 'ifelse !true else'
+          [ ifelse !true else ]
+0054    | OP_PRINT
+ifelse !true else
+0055   15 OP_RETURN

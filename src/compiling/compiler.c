@@ -59,6 +59,7 @@ static void statement(void);
 static void print_statement(void);
 static void block(void);
 static void expression_statement(void);
+static void if_statement(void);
 
 static void parse_precedence(Precedence precedence);
 
@@ -188,8 +189,10 @@ static void end_compiler(void) {
     emit_return();
 
 #ifdef DEBUG_TRACE_CODE
-    if (!parser.had_error)
+    if (!parser.had_error) {
         disassemble_chunk(curr_chunk(), "code");
+        printf("\n");
+    }
 #endif
 }
 
@@ -371,6 +374,8 @@ static void var_declaration(void) {
 static void statement(void) {
     if (match(TOKEN_PRINT)) {
         print_statement();
+    } else if (match(TOKEN_IF)) {
+        if_statement();
     } else if (match(TOKEN_LEFT_BRACE)) {
         begin_scope();
         block();
@@ -398,6 +403,59 @@ static void expression_statement(void) {
     expression();
     consume(TOKEN_SEMICOLON, "expected ';' after expression");
     emit_byte(OP_POP);
+}
+
+static int emit_jump(uint8_t jump_op) {
+    emit_byte(jump_op);
+    emit_byte(0xFF);
+    emit_byte(0xFF);
+    return curr_chunk()->count - 2;
+}
+
+static void patch_jump(int offset) {
+    // -2 to adjust for the bytecode for the jump offset itself
+    int jump = curr_chunk()->count - offset - 2;
+
+    if (jump > UINT16_MAX) {
+        error("too much code to jump over");
+    }
+
+    uint8_t upper_byte = (jump >> 8) & 0xff;
+    uint8_t lower_byte = jump & 0xFF;
+    curr_chunk()->code[offset] = upper_byte;
+    curr_chunk()->code[offset + 1] = lower_byte;
+}
+
+static void if_statement(void) {
+    consume(TOKEN_LEFT_PAREN, "expected '(' after 'if'");
+    expression();  //> expr
+    consume(TOKEN_RIGHT_PAREN, "expected ')' after expression in if statement");
+
+    int then_jump = emit_jump(OP_JUMP_IF_FALSE);  //> expr jumpf off1 off2
+
+    // pop the value of the condition expression if the then branch executes
+    emit_byte(OP_POP);  //> expr jumpf off1 off2 pop
+    //> expr jumpf off1 off2 pop stmt
+    statement();
+
+    //> expr jumpf off1 off2 pop then_stmt jump off1 off2
+    int else_jump = emit_jump(OP_JUMP);
+
+    //> expr jumpf 00 05 pop then_stmt jump off1 off2
+    patch_jump(then_jump);
+
+    // pop the value of the condition expression if the else branch executes
+    // this is not included with the rest of the else branch because it needs to
+    // execute even if there is no explicit else
+    //> expr jumpf 00 05 pop then_stmt jump off1 off2 pop
+    emit_byte(OP_POP);
+    if (match(TOKEN_ELSE)) {
+        //> expr jumpf 00 05 pop then_stmt jump off1 off2 pop else_statement
+        statement();
+    }
+
+    //> expr jumpf 00 05 pop then_stmt jump 00 02 pop else_statement ...rest
+    patch_jump(else_jump);
 }
 
 static void parse_precedence(Precedence precedence) {

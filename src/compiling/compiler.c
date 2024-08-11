@@ -61,6 +61,7 @@ static void block(void);
 static void expression_statement(void);
 static void if_statement(void);
 static void while_statement(void);
+static void for_statement(void);
 
 static void parse_precedence(Precedence precedence);
 
@@ -381,6 +382,8 @@ static void statement(void) {
         if_statement();
     } else if (match(TOKEN_WHILE)) {
         while_statement();
+    } else if (match(TOKEN_FOR)) {
+        for_statement();
     } else if (match(TOKEN_LEFT_BRACE)) {
         begin_scope();
         block();
@@ -492,6 +495,60 @@ static void while_statement(void) {
 
     patch_jump(exit_jump);
     emit_byte(OP_POP);
+}
+
+static void for_statement(void) {
+    // for ((var_decl | expr_stmt); expr; stmt) stmt
+    // diagram in img/for-diagram.png
+
+    begin_scope();
+
+    consume(TOKEN_LEFT_PAREN, "expected '(' after 'for'");
+
+    // initializer
+    if (match(TOKEN_SEMICOLON)) {
+        // no initializer
+    } else if (match(TOKEN_VAR)) {
+        var_declaration();
+    } else {
+        expression_statement();
+    }
+
+    // condition
+    int loop_start = curr_chunk()->count;
+    int exit_jump = -1;
+    if (!match(TOKEN_SEMICOLON)) {
+        expression();
+        consume(TOKEN_SEMICOLON, "expected ';' after 'for' condition clause");
+
+        exit_jump = emit_jump(OP_JUMP_IF_FALSE);
+        emit_byte(OP_POP);
+    }
+
+    if (!match(TOKEN_RIGHT_PAREN)) {
+        int body_jump = emit_jump(OP_JUMP);
+
+        int increment_start = curr_chunk()->count;
+        expression();
+        consume(TOKEN_RIGHT_PAREN, "expected ')' after for clauses");
+        emit_byte(OP_POP);
+
+        emit_loop(loop_start);
+        loop_start = increment_start;
+
+        patch_jump(body_jump);
+    }
+
+    statement();
+
+    emit_loop(loop_start);
+
+    if (exit_jump != -1) {
+        patch_jump(exit_jump);
+        emit_byte(OP_POP);
+    }
+
+    end_scope();
 }
 
 static void parse_precedence(Precedence precedence) {

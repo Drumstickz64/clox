@@ -37,3 +37,11 @@ while (while_counter >= 0) {
     print while_counter;
     while_counter = while_counter - 1;
 }
+
+for (var i = 0; i < 3; i = i + 1) print i;
+
+var i = 5;
+for (;i > 0;) {
+    print i;
+    i = i - 2;
+}

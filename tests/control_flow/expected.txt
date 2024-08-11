@@ -13,3 +13,9 @@ false
 false
 true
 10
+5
+4
+3
+2
+1
+0

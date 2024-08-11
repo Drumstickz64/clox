@@ -60,6 +60,7 @@ static void print_statement(void);
 static void block(void);
 static void expression_statement(void);
 static void if_statement(void);
+static void while_statement(void);
 
 static void parse_precedence(Precedence precedence);
 
@@ -378,6 +379,8 @@ static void statement(void) {
         print_statement();
     } else if (match(TOKEN_IF)) {
         if_statement();
+    } else if (match(TOKEN_WHILE)) {
+        while_statement();
     } else if (match(TOKEN_LEFT_BRACE)) {
         begin_scope();
         block();
@@ -458,6 +461,37 @@ static void if_statement(void) {
 
     //> expr jumpf 00 05 pop then_stmt jump 00 02 pop else_statement ...rest
     patch_jump(else_jump);
+}
+
+static void emit_loop(int loop_start) {
+    emit_byte(OP_LOOP);
+
+    // +2 because we need to jump after the offset bytes
+    int offset = curr_chunk()->count + 2 - loop_start;
+    if (offset > UINT16_MAX) {
+        error("loop body is too large");
+    }
+
+    emit_byte((offset >> 8) & 0xFF);
+    emit_byte(offset & 0xFF);
+}
+
+static void while_statement(void) {
+    int loop_start = curr_chunk()->count;
+
+    consume(TOKEN_LEFT_PAREN, "expected '(' after 'while'");
+    expression();
+    consume(TOKEN_RIGHT_PAREN,
+            "expected ')' after expression in while statement");
+
+    int exit_jump = emit_jump(OP_JUMP_IF_FALSE);
+
+    emit_byte(OP_POP);
+    statement();
+    emit_loop(loop_start);
+
+    patch_jump(exit_jump);
+    emit_byte(OP_POP);
 }
 
 static void parse_precedence(Precedence precedence) {

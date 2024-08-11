@@ -107,6 +107,11 @@ static InterpretResult run(void) {
                 }
                 break;
             }
+            case OP_LOOP: {
+                uint16_t jump = READ_SHORT();
+                vm.ip -= jump;
+                break;
+            }
             case OP_PRINT: {
                 value_print(pop());
                 printf("\n");

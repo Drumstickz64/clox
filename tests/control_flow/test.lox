@@ -28,3 +28,12 @@ print true and 10;
 print false and 10;
 print true or 10;
 print false or 10;
+
+while (false)
+    print "SHOULD NEVER RUN";
+
+var while_counter = 5;
+while (while_counter >= 0) {
+    print while_counter;
+    while_counter = while_counter - 1;
+}

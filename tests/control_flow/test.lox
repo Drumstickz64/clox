@@ -13,3 +13,18 @@ if (!true) {
 } else {
     print "ifelse !true else";
 }
+
+print true and true;
+print false and true;
+print true and false;
+print false and false;
+
+print true or true;
+print false or true;
+print true or false;
+print false or false;
+
+print true and 10;
+print false and 10;
+print true or 10;
+print false or 10;

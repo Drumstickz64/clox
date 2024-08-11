@@ -65,6 +65,8 @@ static void parse_precedence(Precedence precedence);
 
 static void expression(void);
 static void binary(bool can_assign);
+static void and_(bool can_assign);
+static void or_(bool can_assign);
 static void unary(bool can_assign);
 static void grouping(bool can_assign);
 static void variable(bool can_assign);
@@ -95,7 +97,7 @@ ParseRule rules[] = {
     [TOKEN_IDENTIFIER] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
-    [TOKEN_AND] = {NULL, NULL, PREC_NONE},
+    [TOKEN_AND] = {NULL, and_, PREC_AND},
     [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
@@ -103,7 +105,7 @@ ParseRule rules[] = {
     [TOKEN_FUN] = {NULL, NULL, PREC_NONE},
     [TOKEN_IF] = {NULL, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
-    [TOKEN_OR] = {NULL, NULL, PREC_NONE},
+    [TOKEN_OR] = {NULL, or_, PREC_OR},
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
     [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
@@ -525,6 +527,26 @@ static void binary(bool) {
             UNREACHABLE("encountered invalid binary operator");
         }
     }
+}
+
+static void and_(bool) {
+    int end_jump = emit_jump(OP_JUMP_IF_FALSE);
+
+    emit_byte(OP_POP);
+    parse_precedence(PREC_AND);
+
+    patch_jump(end_jump);
+}
+
+static void or_(bool) {
+    int else_jump = emit_jump(OP_JUMP_IF_FALSE);
+    int end_jump = emit_jump(OP_JUMP);
+    patch_jump(else_jump);
+
+    emit_byte(OP_POP);
+    parse_precedence(PREC_OR);
+
+    patch_jump(end_jump);
 }
 
 static void unary(bool) {

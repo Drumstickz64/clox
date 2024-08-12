@@ -45,6 +45,15 @@ static uint32_t hash_string(const char* key, int len) {
     return hash;
 }
 
+ObjFunction* function_new(void) {
+    ObjFunction* function = ALLOCATE_OBJ(ObjFunction, OBJ_FUNCTION);
+    function->arity = 0;
+    function->name = NULL;
+    chunk_init(&function->chunk);
+
+    return function;
+}
+
 ObjString* copy_string(const char* src, int len) {
     uint32_t hash = hash_string(src, len);
     ObjString* interned = table_find_string(&vm.strings, src, len, hash);
@@ -71,12 +80,24 @@ ObjString* take_string(char* string, int len) {
     return allocate_string_obj(string, len, hash);
 }
 
+static void function_print(ObjFunction* function) {
+    if (!function->name) {
+        printf("<script>");
+        return;
+    }
+
+    printf("<fn %s>", function->name->chars);
+}
+
 void obj_print(Value value) {
     ASSERT(value.type == VAL_OBJ, "the value to print is an object");
 
     switch (OBJ_TYPE(value)) {
         case OBJ_STRING:
             printf("%s", AS_CSTRING(value));
+            break;
+        case OBJ_FUNCTION:
+            function_print(AS_FUNCTION(value));
             break;
     }
 }

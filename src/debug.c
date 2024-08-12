@@ -18,7 +18,7 @@ static int constant_instruction(const char* name, Chunk* chunk, int offset) {
 
 static int byte_instruction(const char* name, Chunk* chunk, int offset) {
     uint8_t slot = chunk->code[offset + 1];
-    printf("%-16s %4d\n", name, slot);
+    printf("%-16s %4d\n", name, slot - 1);
     return offset + 2;
 }
 

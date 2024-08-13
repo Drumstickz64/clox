@@ -43,7 +43,7 @@ typedef struct ParseRule {
 
 typedef struct Local {
     Token name;
-    // the scope depth of the local, -1 means it's not defined yet
+    // the scope depth of the local, -1 means the variable has not defined yet
     int depth;
 } Local;
 
@@ -53,6 +53,7 @@ typedef enum FunctionType {
 } FunctionType;
 
 typedef struct Compiler {
+    struct Compiler* enclosing;
     ObjFunction* function;
     FunctionType type;
 
@@ -62,6 +63,7 @@ typedef struct Compiler {
 } Compiler;
 
 static void declaration(void);
+static void fun_declaration(void);
 static void var_declaration(void);
 static void statement(void);
 static void print_statement(void);
@@ -131,12 +133,19 @@ Parser parser = {0};
 Compiler* current = NULL;
 
 static void compiler_init(Compiler* compiler, FunctionType type) {
+    compiler->enclosing = current;
     compiler->function = NULL;
     compiler->type = type;
     compiler->local_count = 0;
     compiler->scope_depth = 0;
     compiler->function = function_new();
     current = compiler;
+    if (type != TYPE_SCRIPT) {
+        // we call init compiler right parsing the function name, so we can grab
+        // the name from the previous token
+        current->function->name =
+            copy_string(parser.prev_token.start, parser.prev_token.length);
+    }
 
     Local* local = &compiler->locals[compiler->local_count++];
     local->name.start = "";
@@ -188,8 +197,7 @@ static uint8_t make_constant(Value value) {
     if (constant > UINT8_MAX) {
         error(
             "too many constants in one chunk, can only have a maximum of "
-            "255 "
-            "constants in one chunk");
+            "255 constants in one chunk");
         return 0;
     }
 
@@ -216,6 +224,7 @@ static ObjFunction* end_compiler(void) {
     }
 #endif
 
+    current = current->enclosing;
     return function;
 }
 
@@ -297,18 +306,6 @@ static void consume(TokenType type, const char* msg) {
     }
 }
 
-static void declaration(void) {
-    if (match(TOKEN_VAR)) {
-        var_declaration();
-    } else {
-        statement();
-    }
-
-    if (parser.is_panicking) {
-        synchronize();
-    }
-}
-
 static uint8_t identifier_constant(Token* token) {
     return make_constant(OBJ_VAL(copy_string(token->start, token->length)));
 }
@@ -365,6 +362,10 @@ static uint8_t parse_variable(const char* err_msg) {
     return identifier_constant(&parser.prev_token);
 }
 static void mark_initialized(void) {
+    if (current->scope_depth == 0) {
+        return;
+    }
+
     current->locals[current->local_count - 1].depth = current->scope_depth;
 }
 
@@ -378,6 +379,54 @@ static void define_variable(uint8_t global) {
     }
 
     emit_byte2(OP_DEFINE_GLOBAL, global);
+}
+
+static void declaration(void) {
+    if (match(TOKEN_FUN)) {
+        fun_declaration();
+    } else if (match(TOKEN_VAR)) {
+        var_declaration();
+    } else {
+        statement();
+    }
+
+    if (parser.is_panicking) {
+        synchronize();
+    }
+}
+
+static void function(FunctionType type) {
+    Compiler compiler;
+    compiler_init(&compiler, type);
+    begin_scope();  // end_scope() not needed because we end the whole compiler
+
+    consume(TOKEN_LEFT_PAREN, "expected '(' after function name");
+    if (!check(TOKEN_RIGHT_PAREN)) {
+        do {
+            current->function->arity++;
+            if (current->function->arity > 255) {
+                error_at_curr(
+                    "can't have more than 255 parameters in a function");
+            }
+
+            uint8_t constant = parse_variable("expected parameter name");
+            define_variable(constant);
+        } while (match(TOKEN_COMMA));
+    }
+    consume(TOKEN_RIGHT_PAREN, "expected ')' after function parameters");
+    consume(TOKEN_LEFT_BRACE, "expected '{' before function body");
+    block();
+
+    ObjFunction* function = end_compiler();
+
+    emit_byte2(OP_CONSTANT, make_constant(OBJ_VAL(function)));
+}
+
+static void fun_declaration(void) {
+    uint8_t global = parse_variable("expected function name");
+    mark_initialized();
+    function(TYPE_FUNCTION);
+    define_variable(global);
 }
 
 static void var_declaration(void) {

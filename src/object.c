@@ -54,6 +54,13 @@ ObjFunction* function_new(void) {
     return function;
 }
 
+ObjNative* native_new(NativeFn function, int arity) {
+    ObjNative* native_fn = ALLOCATE_OBJ(ObjNative, OBJ_NATIVE);
+    native_fn->function = function;
+    native_fn->arity = arity;
+    return native_fn;
+}
+
 ObjString* copy_string(const char* src, int len) {
     uint32_t hash = hash_string(src, len);
     ObjString* interned = table_find_string(&vm.strings, src, len, hash);
@@ -93,11 +100,14 @@ void obj_print(Value value) {
     ASSERT(value.type == VAL_OBJ, "the value to print is an object");
 
     switch (OBJ_TYPE(value)) {
-        case OBJ_STRING:
-            printf("%s", AS_CSTRING(value));
-            break;
         case OBJ_FUNCTION:
             function_print(AS_FUNCTION(value));
+            break;
+        case OBJ_NATIVE:
+            printf("<native fn>");
+            break;
+        case OBJ_STRING:
+            printf("%s", AS_CSTRING(value));
             break;
     }
 }

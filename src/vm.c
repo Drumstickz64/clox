@@ -1,6 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "assert.h"
 #include "common.h"
@@ -13,6 +14,12 @@
 #include "vm.h"
 
 VM vm;
+
+static Value clock_native(int arg_count, Value* args) {
+    UNUSED(arg_count);
+    UNUSED(args);
+    return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
+}
 
 static void reset_stack(void) {
     vm.stack_top = vm.stack;
@@ -44,6 +51,14 @@ static void runtime_error(const char* format, ...) {
     reset_stack();
 }
 
+static void define_native(const char* name, NativeFn function, int arity) {
+    push(OBJ_VAL(copy_string(name, (int)strlen(name))));
+    push(OBJ_VAL(native_new(function, arity)));
+    table_set(&vm.globals, AS_STRING(vm.stack[0]), vm.stack[1]);
+    pop();
+    pop();
+}
+
 static Value peek(int distance) {
     return vm.stack_top[-1 - distance];
 }
@@ -72,7 +87,19 @@ static bool call_value(Value callee, int arg_count) {
         switch (OBJ_TYPE(callee)) {
             case OBJ_FUNCTION:
                 return call(AS_FUNCTION(callee), arg_count);
-
+            case OBJ_NATIVE: {
+                ObjNative* native_fn = AS_NATIVE(callee);
+                if (arg_count != native_fn->arity) {
+                    runtime_error("expected %d arguments, got %d",
+                                  native_fn->arity, arg_count);
+                }
+                Value result =
+                    native_fn->function(arg_count, vm.stack_top - arg_count);
+                // +1 to also free the native function object
+                vm.stack_top -= arg_count + 1;
+                push(result);
+                return true;
+            }
             default:
                 break;
         }
@@ -305,6 +332,8 @@ void init_vm(void) {
     vm.objects = NULL;
     table_init(&vm.globals);
     table_init(&vm.strings);
+
+    define_native("clock", clock_native, 0);
 }
 
 void free_vm(void) {

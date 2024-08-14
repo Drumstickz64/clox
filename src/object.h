@@ -6,8 +6,9 @@
 #include "value.h"
 
 typedef enum ObjType {
-    OBJ_STRING,
     OBJ_FUNCTION,
+    OBJ_NATIVE,
+    OBJ_STRING,
 } ObjType;
 
 struct Obj {
@@ -22,6 +23,14 @@ typedef struct ObjFunction {
     ObjString* name;
 } ObjFunction;
 
+typedef Value (*NativeFn)(int arg_count, Value* args);
+
+typedef struct ObjNative {
+    Obj obj;
+    int arity;
+    NativeFn function;
+} ObjNative;
+
 typedef struct ObjString {
     Obj obj;
     int len;
@@ -31,18 +40,21 @@ typedef struct ObjString {
 
 #define OBJ_TYPE(value_struct) (AS_OBJ(value_struct)->type)
 
-#define IS_STRING(obj) (obj_is_type(obj, OBJ_STRING))
 #define IS_FUNCTION(obj) (obj_is_type(obj, OBJ_FUNCTION))
+#define IS_NATIVE(obj) (obj_is_type(obj, OBJ_NATIVE))
+#define IS_STRING(obj) (obj_is_type(obj, OBJ_STRING))
 
 #define AS_STRING(value) ((ObjString*)AS_OBJ(value))
 #define AS_CSTRING(value) (((ObjString*)AS_OBJ(value))->chars)
 #define AS_FUNCTION(value) ((ObjFunction*)AS_OBJ(value))
+#define AS_NATIVE(value) (((ObjNative*)AS_OBJ(value)))
 
 static inline bool obj_is_type(Value value, ObjType type) {
     return IS_OBJ(value) && OBJ_TYPE(value) == type;
 }
 
 ObjFunction* function_new(void);
+ObjNative* native_new(NativeFn function, int arity);
 ObjString* copy_string(const char* src, int len);
 ObjString* take_string(char* chars, int len);
 void obj_print(Value value);

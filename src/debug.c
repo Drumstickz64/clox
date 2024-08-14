@@ -18,7 +18,7 @@ static int constant_instruction(const char* name, Chunk* chunk, int offset) {
 
 static int byte_instruction(const char* name, Chunk* chunk, int offset) {
     uint8_t slot = chunk->code[offset + 1];
-    printf("%-16s %4d\n", name, slot - 1);
+    printf("%-16s %4d\n", name, slot);
     return offset + 2;
 }
 
@@ -99,6 +99,8 @@ int disassemble_instruction(Chunk* chunk, int offset) {
             return jump_instruction("OP_JUMP_IF_FALSE", 1, chunk, offset);
         case OP_LOOP:
             return jump_instruction("OP_LOOP", -1, chunk, offset);
+        case OP_CALL:
+            return byte_instruction("OP_CALL", chunk, offset);
         default:
             printf("unknown instruction %d\n", instruction);
             return offset + 1;

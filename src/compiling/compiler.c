@@ -70,12 +70,14 @@ static void print_statement(void);
 static void block(void);
 static void expression_statement(void);
 static void if_statement(void);
+static void return_statement(void);
 static void while_statement(void);
 static void for_statement(void);
 
 static void parse_precedence(Precedence precedence);
 
 static void expression(void);
+static void call(bool can_assign);
 static void binary(bool can_assign);
 static void and_(bool can_assign);
 static void or_(bool can_assign);
@@ -87,7 +89,7 @@ static void number(bool can_assign);
 static void string(bool can_assign);
 
 ParseRule rules[] = {
-    [TOKEN_LEFT_PAREN] = {grouping, NULL, PREC_NONE},
+    [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
     [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
     [TOKEN_LEFT_BRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},
@@ -209,6 +211,7 @@ static void emit_constant(Value value) {
 }
 
 static void emit_return(void) {
+    emit_byte(OP_NIL);
     emit_byte(OP_RETURN);
 }
 
@@ -448,6 +451,8 @@ static void statement(void) {
         print_statement();
     } else if (match(TOKEN_IF)) {
         if_statement();
+    } else if (match(TOKEN_RETURN)) {
+        return_statement();
     } else if (match(TOKEN_WHILE)) {
         while_statement();
     } else if (match(TOKEN_FOR)) {
@@ -532,6 +537,21 @@ static void if_statement(void) {
 
     //> expr jumpf 00 05 pop then_stmt jump 00 02 pop else_statement ...rest
     patch_jump(else_jump);
+}
+
+static void return_statement(void) {
+    if (current->type == TYPE_SCRIPT) {
+        error("can't return from top-level code");
+    }
+
+    if (match(TOKEN_SEMICOLON)) {
+        emit_return();
+        return;
+    }
+
+    expression();
+    consume(TOKEN_SEMICOLON, "expected ';' after expression");
+    emit_byte(OP_RETURN);
 }
 
 static void emit_loop(int loop_start) {
@@ -642,8 +662,29 @@ static void parse_precedence(Precedence precedence) {
     }
 }
 
-static void expression() {
+static void expression(void) {
     parse_precedence(PREC_ASSIGNMENT);
+}
+
+static uint8_t argument_list(void) {
+    uint8_t arg_count = 0;
+    if (!check(TOKEN_RIGHT_PAREN)) {
+        do {
+            expression();
+            if (arg_count == 255) {
+                error("can't have more than 255 arguments");
+            }
+            arg_count++;
+        } while (match(TOKEN_COMMA));
+    }
+
+    consume(TOKEN_RIGHT_PAREN, "expected ')' after arguments");
+    return arg_count;
+}
+
+static void call(bool) {
+    uint8_t arg_count = argument_list();
+    emit_byte2(OP_CALL, arg_count);
 }
 
 static void binary(bool) {

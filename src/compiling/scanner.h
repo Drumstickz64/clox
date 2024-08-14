@@ -59,6 +59,6 @@ typedef struct Token {
 } Token;
 
 void scanner_init(const char* source);
-Token scanner_next_token();
+Token scanner_next_token(void);
 
 #endif

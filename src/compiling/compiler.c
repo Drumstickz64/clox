@@ -155,7 +155,7 @@ static void compiler_init(Compiler* compiler, FunctionType type) {
     local->depth = 0;
 }
 
-static Chunk* curr_chunk() {
+static Chunk* curr_chunk(void) {
     return &current->function->chunk;
 }
 
@@ -682,12 +682,15 @@ static uint8_t argument_list(void) {
     return arg_count;
 }
 
-static void call(bool) {
+static void call(bool can_assign) {
+    UNUSED(can_assign);
     uint8_t arg_count = argument_list();
     emit_byte2(OP_CALL, arg_count);
 }
 
-static void binary(bool) {
+static void binary(bool can_assign) {
+    UNUSED(can_assign);
+
     TokenType operatorType = parser.prev_token.type;
     ParseRule* rule = &rules[operatorType];
     parse_precedence((Precedence)(rule->precedence + 1));
@@ -729,7 +732,8 @@ static void binary(bool) {
     }
 }
 
-static void and_(bool) {
+static void and_(bool can_assign) {
+    UNUSED(can_assign);
     int end_jump = emit_jump(OP_JUMP_IF_FALSE);
 
     emit_byte(OP_POP);
@@ -738,7 +742,8 @@ static void and_(bool) {
     patch_jump(end_jump);
 }
 
-static void or_(bool) {
+static void or_(bool can_assign) {
+    UNUSED(can_assign);
     int else_jump = emit_jump(OP_JUMP_IF_FALSE);
     int end_jump = emit_jump(OP_JUMP);
     patch_jump(else_jump);
@@ -749,7 +754,8 @@ static void or_(bool) {
     patch_jump(end_jump);
 }
 
-static void unary(bool) {
+static void unary(bool can_assign) {
+    UNUSED(can_assign);
     TokenType operatorType = parser.prev_token.type;
 
     parse_precedence(PREC_UNARY);
@@ -766,7 +772,8 @@ static void unary(bool) {
     }
 }
 
-static void grouping(bool) {
+static void grouping(bool can_assign) {
+    UNUSED(can_assign);
     expression();
     consume(TOKEN_RIGHT_PAREN, "expected ')' after expression");
 }
@@ -807,10 +814,12 @@ static void named_variable(Token name, bool can_assign) {
 }
 
 static void variable(bool can_assign) {
+    UNUSED(can_assign);
     named_variable(parser.prev_token, can_assign);
 }
 
-static void literal(bool) {
+static void literal(bool can_assign) {
+    UNUSED(can_assign);
     switch (parser.prev_token.type) {
         case TOKEN_NIL:
             emit_byte(OP_NIL);
@@ -826,12 +835,14 @@ static void literal(bool) {
     }
 }
 
-static void number(bool) {
+static void number(bool can_assign) {
+    UNUSED(can_assign);
     double value = strtod(parser.prev_token.start, NULL);
     emit_constant(NUMBER_VAL(value));
 }
 
-static void string(bool) {
+static void string(bool can_assign) {
+    UNUSED(can_assign);
     emit_constant(OBJ_VAL(copy_string(parser.prev_token.start + 1,
                                       parser.prev_token.length - 2)));
 }

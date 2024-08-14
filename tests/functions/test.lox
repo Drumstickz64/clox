@@ -1,0 +1,22 @@
+fun areWeHavingItYet() {
+  print "Yes we are!";
+}
+
+print areWeHavingItYet;
+areWeHavingItYet();
+
+fun sum(a, b, c) {
+  return a + b + c;
+}
+
+print sum(1, 2, 3);
+
+fun fib(n) {
+   if (n <= 2)
+       return 1;
+   else {
+       return fib(n - 2) + fib(n - 1);
+   }
+}
+
+print fib(20);

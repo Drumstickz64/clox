@@ -1,13 +1,1 @@
-0000    1 OP_CONSTANT         0 'abc'
-          [ abc ]
-0002    | OP_CONSTANT         1 'def'
-          [ abc ][ def ]
-0004    | OP_ADD
-          [ abcdef ]
-0005    | OP_CONSTANT         2 'abcdef'
-          [ abcdef ][ abcdef ]
-0007    | OP_EQUAL
-          [ true ]
-0008    | OP_PRINT
 true
-0009    | OP_RETURN

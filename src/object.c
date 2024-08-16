@@ -45,6 +45,12 @@ static uint32_t hash_string(const char* key, int len) {
     return hash;
 }
 
+ObjClosure* closure_new(ObjFunction* function) {
+    ObjClosure* closure = ALLOCATE_OBJ(ObjClosure, OBJ_CLOSURE);
+    closure->function = function;
+    return closure;
+}
+
 ObjFunction* function_new(void) {
     ObjFunction* function = ALLOCATE_OBJ(ObjFunction, OBJ_FUNCTION);
     function->arity = 0;
@@ -100,6 +106,9 @@ void obj_print(Value value) {
     ASSERT(value.type == VAL_OBJ, "the value to print is an object");
 
     switch (OBJ_TYPE(value)) {
+        case OBJ_CLOSURE:
+            function_print(AS_CLOSURE(value)->function);
+            break;
         case OBJ_FUNCTION:
             function_print(AS_FUNCTION(value));
             break;

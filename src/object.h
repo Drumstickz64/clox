@@ -6,6 +6,7 @@
 #include "value.h"
 
 typedef enum ObjType {
+    OBJ_CLOSURE,
     OBJ_FUNCTION,
     OBJ_NATIVE,
     OBJ_STRING,
@@ -38,14 +39,21 @@ typedef struct ObjString {
     uint32_t hash;
 } ObjString;
 
+typedef struct ObjClosure {
+    Obj obj;
+    ObjFunction* function;
+} ObjClosure;
+
 #define OBJ_TYPE(value_struct) (AS_OBJ(value_struct)->type)
 
+#define IS_CLOSURE(obj) (obj_is_type(obj, OBJ_CLOSURE))
 #define IS_FUNCTION(obj) (obj_is_type(obj, OBJ_FUNCTION))
 #define IS_NATIVE(obj) (obj_is_type(obj, OBJ_NATIVE))
 #define IS_STRING(obj) (obj_is_type(obj, OBJ_STRING))
 
 #define AS_STRING(value) ((ObjString*)AS_OBJ(value))
 #define AS_CSTRING(value) (((ObjString*)AS_OBJ(value))->chars)
+#define AS_CLOSURE(value) ((ObjClosure*)AS_OBJ(value))
 #define AS_FUNCTION(value) ((ObjFunction*)AS_OBJ(value))
 #define AS_NATIVE(value) (((ObjNative*)AS_OBJ(value)))
 
@@ -53,6 +61,7 @@ static inline bool obj_is_type(Value value, ObjType type) {
     return IS_OBJ(value) && OBJ_TYPE(value) == type;
 }
 
+ObjClosure* closure_new(ObjFunction* function);
 ObjFunction* function_new(void);
 ObjNative* native_new(NativeFn function, int arity);
 ObjString* copy_string(const char* src, int len);

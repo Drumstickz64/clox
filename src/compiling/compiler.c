@@ -422,7 +422,7 @@ static void function(FunctionType type) {
 
     ObjFunction* function = end_compiler();
 
-    emit_byte2(OP_CONSTANT, make_constant(OBJ_VAL(function)));
+    emit_byte2(OP_CLOSURE, make_constant(OBJ_VAL(function)));
 }
 
 static void fun_declaration(void) {

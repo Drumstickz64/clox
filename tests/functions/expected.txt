@@ -1,7 +1,0 @@
-<fn areWeHavingItYet>
-repeat after me!
-Yes we are!
-Yes we are!
-Yes we are!
-6
-9.22747e+06

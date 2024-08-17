@@ -11,8 +11,7 @@
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_C_COMPILER": "C:/Users/ALMUSTAQBAL/Apps/mingw64/bin/gcc.exe",
                 "CMAKE_CXX_COMPILER": "C:/Users/ALMUSTAQBAL/Apps/mingw64/bin/g++.exe",
-                "CMAKE_BUILD_TYPE": "Debug",
-                "DEBUG_TRACE_EXECUTION": "ON"
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         }
     ]

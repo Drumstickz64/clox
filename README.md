@@ -10,19 +10,3 @@ To build CLox you need a C compiler and CMake
 cmake -S . -B build
 cmake --build build
 ```
-
-## Testing
-
-You need NodeJs to run the integration tests, also make sure to have run CMake configuration
-
-```shell
-node runTests.js <path-to-binary-relative-to-build-dir>
-```
-
-For example:
-
-```shell
-node runTests.js clox.exe
-```
-
-If a test fails, it outputs an `output.txt` in the directory of the failed test for easy diffing

@@ -1,1 +1,0 @@
-print "abc" + "def" == "abcdef";

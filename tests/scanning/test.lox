@@ -1,5 +1,0 @@
-() {} ; , . - + / *  // this is a comment
-! != = == > >= < <=
-foo "foo" 42
-and class else false for fun if nil or print return super this true var while
-& // unexpected token

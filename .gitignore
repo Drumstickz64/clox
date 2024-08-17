@@ -1,6 +1,3 @@
-tmp*
-tests/**/output.txt
-
 # Prerequisites
 *.d
 

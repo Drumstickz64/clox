@@ -1,9 +1,0 @@
-var global = 10;
-
-{
-    var local1 = global;
-    var local2 = local1 + 2;
-    print local1 = local1 * local1;
-    print local1;
-    print local2;
-}

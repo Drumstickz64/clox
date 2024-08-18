@@ -1,0 +1,295 @@
+print "Hello" + " World";
+print (1 + 2 - 3) / (4 * -5);
+print 1 > 2;
+print 1 >= 2;
+print 1 < 2;
+print 1 <= 2;
+print 1 == 2;
+print 1 != 2;
+
+var name = "ahmed";
+var age = 12;
+
+print "Hello. My name is";
+print name;
+print "I'm";
+print age;
+print "years old";
+
+var a;
+var b;
+var c = 1;
+
+// var 1 = 1; invalid
+// 1 = 2; invalid
+
+print b;
+
+a = b = c;
+
+print a;
+print b;
+print c;
+
+var a = "global a";
+var b = "global b";
+var c = "global c";
+{
+  var a = "outer a";
+  var b = "outer b";
+  {
+    var a = "inner a";
+    print a;
+    print b;
+    print c;
+  }
+  print a;
+  print b;
+  print c;
+}
+print a;
+print b;
+print c;
+
+var d = 1;
+{
+  var dd = d + 2;
+  print dd;
+}
+
+var apples = 10;
+if (apples == 10) print "ten apples!";
+else {
+  print "Oh.";
+  print apples;
+  print " Apples";
+}
+
+var shouldRun = true;
+if (shouldRun) print "Running.";
+
+print "---- logical test ----";
+
+print "-- should be false --";
+var l = 12;
+print 1 == 2 or 2 != 1 and l == 2;
+
+print "-- should be true --";
+print (l = 2) == 2 or false and true;
+
+if (l == 2) {
+  print "l changed successfully!";
+  print "l now equals:";
+  print l;
+}
+
+print "--- non bools ---";
+print "-- should print 1 --";
+print 1 or nil;
+
+print "-- should print false --";
+print 1 and false;
+
+print "---- while loop test ----";
+
+var loopI = 5;
+while (loopI > 0) {
+  print loopI;
+  loopI = loopI - 1;
+}
+
+print "---- for loop test ----";
+var a = 0;
+var temp;
+
+for (var b = 1; a < 10000; b = temp + b) {
+  print a;
+  temp = a;
+  a = b;
+}
+
+// for (;;) {
+//   print "looping...";
+// }
+
+print "---- function test ----";
+print "the current time is";
+print clock();
+
+fun add(a, b) {
+  print a + b;
+}
+
+print add; // "<fn add>".
+add(1, 1);
+
+fun sayHi(first, last) {
+  print "Hi, " + first + " " + last + "!";
+}
+
+sayHi("Dear", "Reader");
+
+print "--fib test--";
+fun fib(n) {
+  if (n < 2) {
+    return n;
+  }
+
+  return fib(n - 2) + fib(n - 1);
+}
+
+var start = clock();
+for (var i = 0; i <= 20; i = i + 1) {
+  print fib(i);
+}
+var end = clock();
+print "fib took: ";
+print end - start;
+
+print "-- closure test --";
+fun makeCounter() {
+  var i = 0;
+  fun count() {
+    i = i + 1;
+    print i;
+  }
+
+  return count;
+}
+
+var counter = makeCounter();
+print "should print 1";
+counter(); // "1".
+print "should print 2";
+counter(); // "2".
+
+// class Breakfast {
+//   cook() {
+//     print "Eggs a-fryin'!";
+//   }
+
+//   serve(who) {
+//     print "Enjoy your breakfast, " + who + ".";
+//   }
+// }
+
+// print Breakfast;
+
+// class Bagel {}
+// var bagel = Bagel();
+// print bagel; // Prints "<instance of class Bagel>".
+
+// bagel.size = "large";
+// print bagel.size;
+
+// class Bacon {
+//   eat() {
+//     print "Crunch crunch crunch!";
+//   }
+// }
+
+// Bacon().eat(); // Prints "Crunch crunch crunch!".
+// // Bacon().doesNotExist(); // invalid
+
+// class Cake {
+//   taste() {
+//     var adjective = "delicious";
+//     print "The " + this.flavor + " cake is " + adjective + "!";
+//   }
+// }
+
+// var cake = Cake();
+// cake.flavor = "German chocolate";
+// cake.taste(); // Prints "The German chocolate cake is delicious!".
+
+// class Thing {
+//   getCallback() {
+//     fun localFunction() {
+//       print this;
+//     }
+
+//     return localFunction;
+//   }
+// }
+
+// var callback = Thing().getCallback();
+// callback();
+
+// // print this; // invalid
+
+// // fun notAMethod() {
+// //   print this; // invalid
+// // }
+
+// class Player {
+//   init(level) {
+//     this.health = level * 200;
+//     this.strength = level * 2;
+//     this.canUseMagic = false;
+//     if (level >= 20) {
+//       this.canUseMagic = true;
+//     }
+//   }
+
+//   cast(spell) {
+//     if (this.canUseMagic) {
+//       print "Casted " + spell + "!";
+//     } else {
+//       print "You can't use magic.";
+//     }
+//   }
+// }
+
+// var plr = Player(20);
+// print plr.health;
+// print plr.strength;
+// plr.cast("Fireball");
+
+// class Doughnut {
+//   cook() {
+//     print "Fry until golden brown.";
+//   }
+
+//   invalidSuper() {
+//     // super.doSomething(); // invalid
+//   }
+// }
+
+// class BostonCream < Doughnut {
+//   cook() {
+//     super.cook();
+//     print "Pipe full of custard and coat with chocolate.";
+//   }
+// }
+
+// class ChocolateDoughnut < Doughnut {
+//   init(type) {
+//     this.type = type;
+//   }
+
+//   getChocolateType() {
+//     return this.type;
+//   }
+
+//   cook() {
+//     super.cook();
+//     print "Pour";
+//     print this.type;
+//     print "chocolate on top.";
+//   }
+// }
+
+// BostonCream().cook();
+// var choco = ChocolateDoughnut("dark");
+// print choco.getChocolateType();
+// choco.cook();
+
+// class Oops < Oops {} // invalid
+
+// {
+//   var NotAClass = "I am totally not a class";
+
+//   class Subclass < NotAClass {} // ?!
+// }
+
+// super.doSomething(); // invalid

@@ -1,6 +1,8 @@
 #ifndef clox_value_h
 #define clox_value_h
 
+#include <stdio.h>
+
 #include "common.h"
 
 typedef struct Obj Obj;
@@ -46,6 +48,7 @@ void value_array_init(ValueArray* value_array);
 void value_array_free(ValueArray* value_array);
 void value_array_write(ValueArray* value_array, Value value);
 Value value_get(ValueArray* array, uint8_t i);
+void fvalue_print(FILE* file, Value value);
 void value_print(Value value);
 bool values_equal(Value a, Value b);
 

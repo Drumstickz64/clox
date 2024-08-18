@@ -20,9 +20,10 @@ typedef struct VM {
     int frame_count;
     Value stack[STACK_MAX];
     Value* stack_top;
-    Obj* objects;
     Table globals;
     Table strings;
+    Obj* objects;
+    ObjUpvalue* open_upvalues;
 } VM;
 
 typedef enum InterpretResult {

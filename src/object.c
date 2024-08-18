@@ -46,14 +46,22 @@ static uint32_t hash_string(const char* key, int len) {
 }
 
 ObjClosure* closure_new(ObjFunction* function) {
+    ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*, function->upvalue_count);
+    for (int i = 0; i < function->upvalue_count; i++) {
+        upvalues[i] = NULL;
+    }
+
     ObjClosure* closure = ALLOCATE_OBJ(ObjClosure, OBJ_CLOSURE);
     closure->function = function;
+    closure->upvalue_count = function->upvalue_count;
+    closure->upvalues = upvalues;
     return closure;
 }
 
 ObjFunction* function_new(void) {
     ObjFunction* function = ALLOCATE_OBJ(ObjFunction, OBJ_FUNCTION);
     function->arity = 0;
+    function->upvalue_count = 0;
     function->name = NULL;
     chunk_init(&function->chunk);
 
@@ -80,6 +88,14 @@ ObjString* copy_string(const char* src, int len) {
     string[len] = '\0';
     // then allocate the string object itself
     return allocate_string_obj(string, len, hash);
+}
+
+ObjUpvalue* upvalue_new(Value* location) {
+    ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, OBJ_UPVALUE);
+    upvalue->location = location;
+    upvalue->closed = NIL_VAL;
+    upvalue->next = NULL;
+    return upvalue;
 }
 
 ObjString* take_string(char* string, int len) {
@@ -117,6 +133,9 @@ void obj_print(Value value) {
             break;
         case OBJ_STRING:
             printf("%s", AS_CSTRING(value));
+            break;
+        case OBJ_UPVALUE:
+            printf("upvalue");
             break;
     }
 }

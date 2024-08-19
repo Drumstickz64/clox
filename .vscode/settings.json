@@ -1,7 +1,9 @@
 {
   "terminal.integrated.defaultProfile.windows": "Command Prompt",
   "files.associations": {
+    "JUSTFILE": "makefile",
     "*.lox": "lox",
+    ".clang-format": "plaintext",
     "vector": "cpp",
     "stdlib.h": "c",
     "corecrt.h": "c",
@@ -32,7 +34,8 @@
     "config.h": "c",
     "atomic": "c",
     "memory_resource": "c",
-    "initializer_list": "c"
+    "initializer_list": "c",
+    "memory.h": "c"
   },
   "cmake.debugConfig": {
     "args": ["${workspaceFolder}/test.lox"]

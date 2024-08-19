@@ -152,3 +152,11 @@ ObjString* table_find_string(Table* table,
         index = (index + 1) % table->capacity;
     }
 }
+
+void mark_table(Table* table) {
+    for (int i = 0; i < table->capacity; i++) {
+        Entry* entry = &table->entries[i];
+        mark_object((Obj*)entry->key);
+        mark_value(entry->value);
+    }
+}

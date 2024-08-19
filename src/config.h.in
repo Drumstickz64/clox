@@ -1,2 +1,4 @@
 #cmakedefine DEBUG_TRACE_CODE
 #cmakedefine DEBUG_TRACE_EXECUTION
+#cmakedefine DEBUG_STRESS_GC
+#cmakedefine DEBUG_LOG_GC

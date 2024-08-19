@@ -25,5 +25,6 @@ ObjString* table_find_string(Table* table,
                              const char* chars,
                              int len,
                              uint32_t hash);
+void mark_table(Table* table);
 
 #endif

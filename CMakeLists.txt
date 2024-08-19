@@ -16,6 +16,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE "src" "${PROJECT_BINARY_DIR}/
 
 option(DEBUG_TRACE_CODE OFF)
 option(DEBUG_TRACE_EXECUTION OFF)
+option(DEBUG_STRESS_GC OFF)
+option(DEBUG_LOG_GC OFF)
 
 configure_file("src/config.h.in" "src/config.h")
 

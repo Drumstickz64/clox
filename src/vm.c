@@ -399,6 +399,10 @@ static InterpretResult run(void) {
 void init_vm(void) {
     reset_stack();
     vm.objects = NULL;
+    vm.gray_count = 0;
+    vm.gray_capacity = 0;
+    vm.gray_stack = NULL;
+
     table_init(&vm.globals);
     table_init(&vm.strings);
 

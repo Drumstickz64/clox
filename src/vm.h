@@ -24,6 +24,9 @@ typedef struct VM {
     Table strings;
     Obj* objects;
     ObjUpvalue* open_upvalues;
+    int gray_count;
+    int gray_capacity;
+    Obj** gray_stack;
 } VM;
 
 typedef enum InterpretResult {

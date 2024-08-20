@@ -28,7 +28,7 @@ void* reallocate(void* pointer, size_t old_size, size_t new_size) {
 }
 
 void mark_object(Obj* obj) {
-    if (!obj) {
+    if (!obj || obj->is_marked) {
         return;
     }
 
@@ -39,6 +39,18 @@ void mark_object(Obj* obj) {
 #endif
 
     obj->is_marked = true;
+
+    if (vm.gray_capacity < vm.gray_count + 1) {
+        vm.gray_capacity = GROW_CAPACITY(vm.gray_capacity);
+        vm.gray_stack =
+            (Obj**)realloc(vm.gray_stack, sizeof(Obj*) * vm.gray_capacity);
+    }
+
+    if (!vm.gray_stack) {
+        exit(1);
+    }
+
+    vm.gray_stack[vm.gray_count++] = obj;
 }
 
 static void mark_roots(void) {
@@ -66,12 +78,60 @@ void mark_value(Value value) {
     }
 }
 
+static void mark_array(ValueArray* array) {
+    for (int i = 0; i < array->count; i++) {
+        mark_value(array->values[i]);
+    }
+}
+
+static void blacken_object(Obj* obj) {
+#ifdef DEBUG_LOG_GC
+    printf("%p blacken ", (void*)obj);
+    printValue(OBJ_VAL(obj));
+    printf("\n");
+#endif
+
+    switch (obj->type) {
+        case OBJ_CLOSURE: {
+            ObjClosure* closure = (ObjClosure*)obj;
+
+            mark_object((Obj*)closure->function);
+
+            for (int i = 0; i < closure->upvalue_count; i++) {
+                mark_object((Obj*)closure->upvalues[i]);
+            }
+
+            break;
+        }
+        case OBJ_FUNCTION: {
+            ObjFunction* function = (ObjFunction*)obj;
+            mark_object((Obj*)function->name);
+            mark_array(&function->chunk.constants);
+            break;
+        }
+        case OBJ_UPVALUE:
+            mark_value(((ObjUpvalue*)obj)->closed);
+            break;
+        case OBJ_NATIVE:
+        case OBJ_STRING:
+            break;
+    }
+}
+
+static void trace_references(void) {
+    while (vm.gray_count > 0) {
+        Obj* obj = vm.gray_stack[--vm.gray_count];
+        blacken_object(obj);
+    }
+}
+
 void collect_garbage(void) {
 #ifdef DEBUG_LOG_GC
     printf("-- gc begin\n");
 #endif
 
     mark_roots();
+    trace_references();
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
@@ -119,4 +179,6 @@ void free_objects(void) {
         free_object(curr_obj);
         curr_obj = next_obj;
     }
+
+    free(vm.gray_stack);
 }

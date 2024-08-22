@@ -9,6 +9,7 @@ typedef enum OpCode {
     OP_NIL,
     OP_TRUE,
     OP_FALSE,
+    OP_IN,
     OP_NEGATE,
     OP_NOT,
     OP_ADD,

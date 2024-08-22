@@ -30,7 +30,8 @@ typedef enum Precedence {
     PREC_TERM,        // + -
     PREC_FACTOR,      // * /
     PREC_UNARY,       // ! -
-    PREC_CALL,        // . ()
+    PREC_IN,
+    PREC_CALL,  // . ()
     PREC_PRIMARY
 } Precedence;
 
@@ -91,6 +92,7 @@ static void dot(bool can_assign);
 static void binary(bool can_assign);
 static void and_(bool can_assign);
 static void or_(bool can_assign);
+static void in(bool can_assign);
 static void unary(bool can_assign);
 static void grouping(bool can_assign);
 static void variable(bool can_assign);
@@ -137,6 +139,7 @@ ParseRule rules[] = {
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_IN] = {NULL, in, PREC_IN},
     [TOKEN_ERROR] = {NULL, NULL, PREC_NONE},
     [TOKEN_EOF] = {NULL, NULL, PREC_NONE},
 };
@@ -800,6 +803,13 @@ static void or_(bool can_assign) {
     parse_precedence(PREC_OR);
 
     patch_jump(end_jump);
+}
+
+static void in(bool can_assign) {
+    UNUSED(can_assign);
+
+    parse_precedence(PREC_IN);
+    emit_byte(OP_IN);
 }
 
 static void unary(bool can_assign) {

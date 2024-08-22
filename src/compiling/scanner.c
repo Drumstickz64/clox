@@ -155,7 +155,15 @@ static TokenType identifier_type(void) {
         case 'e':
             return check_keyword(1, 3, "lse", TOKEN_ELSE);
         case 'i':
-            return check_keyword(1, 1, "f", TOKEN_IF);
+            if (scanner.curr - scanner.start > 1) {
+                switch (scanner.start[1]) {
+                    case 'f':
+                        return TOKEN_IF;
+                    case 'n':
+                        return TOKEN_IN;
+                }
+            }
+            break;
         case 'n':
             return check_keyword(1, 2, "il", TOKEN_NIL);
         case 'o':

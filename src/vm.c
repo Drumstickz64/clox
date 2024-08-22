@@ -394,6 +394,26 @@ static InterpretResult run(void) {
             case OP_FALSE:
                 push(BOOL_VAL(false));
                 break;
+            case OP_IN: {
+                if (!IS_STRING(peek(1))) {
+                    runtime_error("only strings can be used with 'in'");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                if (!IS_INSTANCE(peek(0))) {
+                    runtime_error("only instances have fields");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                ObjString* name = AS_STRING(peek(1));
+                ObjInstance* instance = AS_INSTANCE(peek(0));
+
+                bool exists = table_contains(&instance->fields, name);
+                pop();
+                pop();
+                push(BOOL_VAL(exists));
+                break;
+            }
             case OP_NEGATE: {
                 if (!IS_NUMBER(peek(0))) {
                     runtime_error("negation operand must be a number");

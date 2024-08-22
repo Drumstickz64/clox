@@ -174,7 +174,13 @@ counter(); // "2".
   var pair = Pair();
   print pair.first = 1;
   print pair.second = 2;
-  print pair.first + pair.second;
+  if ("first" in pair and "second" in pair) {
+    print pair.first + pair.second;
+  }
+
+  if (!"third" in pair) {
+    print "pair does not have third";
+  }
 }
 
 // class Breakfast {

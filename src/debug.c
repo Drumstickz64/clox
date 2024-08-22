@@ -84,6 +84,8 @@ int disassemble_instruction(Chunk* chunk, int offset) {
             return simple_instruction("OP_TRUE", offset);
         case OP_FALSE:
             return simple_instruction("OP_FALSE", offset);
+        case OP_IN:
+            return simple_instruction("OP_IN", offset);
         case OP_CONSTANT:
             return constant_instruction("OP_CONSTANT", chunk, offset);
         case OP_GET_LOCAL:

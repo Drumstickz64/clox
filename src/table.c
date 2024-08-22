@@ -100,6 +100,15 @@ bool table_set(Table* table, ObjString* key, Value value) {
     return is_new_key;
 }
 
+bool table_contains(Table* table, ObjString* key) {
+    if (table->count == 0) {
+        return false;
+    }
+
+    Entry* entry = find_entry(table->entries, table->capacity, key);
+    return entry->key != NULL;
+}
+
 bool table_delete(Table* table, ObjString* key) {
     if (table->count == 0) {
         return false;

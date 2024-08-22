@@ -163,9 +163,19 @@ counter(); // "1".
 print "should print 2";
 counter(); // "2".
 
-class Brioche {}
-print Brioche;
-print Brioche();
+{
+  class Brioche {}
+  print Brioche;
+}
+
+{
+  class Pair {}
+
+  var pair = Pair();
+  print pair.first = 1;
+  print pair.second = 2;
+  print pair.first + pair.second;
+}
 
 // class Breakfast {
 //   cook() {

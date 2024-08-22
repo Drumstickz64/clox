@@ -87,6 +87,7 @@ static void parse_precedence(Precedence precedence);
 
 static void expression(void);
 static void call(bool can_assign);
+static void dot(bool can_assign);
 static void binary(bool can_assign);
 static void and_(bool can_assign);
 static void or_(bool can_assign);
@@ -103,7 +104,7 @@ ParseRule rules[] = {
     [TOKEN_LEFT_BRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_COMMA] = {NULL, NULL, PREC_NONE},
-    [TOKEN_DOT] = {NULL, NULL, PREC_NONE},
+    [TOKEN_DOT] = {NULL, dot, PREC_CALL},
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
     [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
     [TOKEN_SEMICOLON] = {NULL, NULL, PREC_NONE},
@@ -721,6 +722,18 @@ static void call(bool can_assign) {
     UNUSED(can_assign);
     uint8_t arg_count = argument_list();
     emit_byte2(OP_CALL, arg_count);
+}
+
+static void dot(bool can_assign) {
+    consume(TOKEN_IDENTIFIER, "expected property name after '.'");
+    uint8_t name_constant = identifier_constant(&parser.prev_token);
+
+    if (can_assign && match(TOKEN_EQUAL)) {
+        expression();
+        emit_byte2(OP_SET_PROPERTY, name_constant);
+    } else {
+        emit_byte2(OP_GET_PROPERTY, name_constant);
+    }
 }
 
 static void binary(bool can_assign) {

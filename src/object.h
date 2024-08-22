@@ -72,8 +72,8 @@ typedef struct ObjInstance {
 
 #define OBJ_TYPE(value_struct) (AS_OBJ(value_struct)->type)
 
-#define IS_INSTANCE(value) isObjType(value, OBJ_INSTANCE)
-#define IS_CLASS(value) isObjType(value, OBJ_CLASS)
+#define IS_INSTANCE(value) obj_is_type(value, OBJ_INSTANCE)
+#define IS_CLASS(value) obj_is_type(value, OBJ_CLASS)
 #define IS_CLOSURE(obj) (obj_is_type(obj, OBJ_CLOSURE))
 #define IS_FUNCTION(obj) (obj_is_type(obj, OBJ_FUNCTION))
 #define IS_NATIVE(obj) (obj_is_type(obj, OBJ_NATIVE))

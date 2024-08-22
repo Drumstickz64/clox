@@ -336,6 +336,38 @@ static InterpretResult run(void) {
                 *frame->closure->upvalues[slot]->location = peek(0);
                 break;
             }
+            case OP_GET_PROPERTY: {
+                if (!IS_INSTANCE(peek(0))) {
+                    runtime_error("only instances have properties");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                ObjInstance* instance = AS_INSTANCE(peek(0));
+                ObjString* name = READ_STRING();
+
+                Value value;
+                if (!table_get(&instance->fields, name, &value)) {
+                    runtime_error("undefined property '%s'.", name->chars);
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                pop();  // instance
+                push(value);
+                break;
+            }
+            case OP_SET_PROPERTY: {
+                if (!IS_INSTANCE(peek(1))) {
+                    runtime_error("only instances have fields");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                ObjInstance* instance = AS_INSTANCE(peek(1));
+                table_set(&instance->fields, READ_STRING(), peek(0));
+                Value value = pop();
+                pop();
+                push(value);
+                break;
+            }
             case OP_EQUAL: {
                 Value b = pop();
                 Value a = pop();

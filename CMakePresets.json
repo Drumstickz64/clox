@@ -13,7 +13,7 @@
                 "CMAKE_CXX_COMPILER": "C:/Users/ALMUSTAQBAL/Apps/mingw64/bin/g++.exe",
                 "CMAKE_BUILD_TYPE": "Debug",
                 "DEBUG_STRESS_GC": "ON",
-                "DEBUG_LOG_GC": "ON"
+                "DEBUG_LOG_GC": "OFF"
             }
         }
     ]

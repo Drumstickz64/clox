@@ -6,6 +6,7 @@
 #include "value.h"
 
 typedef enum ObjType {
+    OBJ_CLASS,
     OBJ_CLOSURE,
     OBJ_FUNCTION,
     OBJ_NATIVE,
@@ -56,8 +57,14 @@ typedef struct ObjClosure {
     int upvalue_count;
 } ObjClosure;
 
+typedef struct ObjClass {
+    Obj obj;
+    ObjString* name;
+} ObjClass;
+
 #define OBJ_TYPE(value_struct) (AS_OBJ(value_struct)->type)
 
+#define IS_CLASS(value) isObjType(value, OBJ_CLASS)
 #define IS_CLOSURE(obj) (obj_is_type(obj, OBJ_CLOSURE))
 #define IS_FUNCTION(obj) (obj_is_type(obj, OBJ_FUNCTION))
 #define IS_NATIVE(obj) (obj_is_type(obj, OBJ_NATIVE))
@@ -65,6 +72,7 @@ typedef struct ObjClosure {
 
 #define AS_STRING(value) ((ObjString*)AS_OBJ(value))
 #define AS_CSTRING(value) (((ObjString*)AS_OBJ(value))->chars)
+#define AS_CLASS(value) ((ObjClass*)AS_OBJ(value))
 #define AS_CLOSURE(value) ((ObjClosure*)AS_OBJ(value))
 #define AS_FUNCTION(value) ((ObjFunction*)AS_OBJ(value))
 #define AS_NATIVE(value) (((ObjNative*)AS_OBJ(value)))
@@ -73,6 +81,7 @@ static inline bool obj_is_type(Value value, ObjType type) {
     return IS_OBJ(value) && OBJ_TYPE(value) == type;
 }
 
+ObjClass* class_new(ObjString* name);
 ObjClosure* closure_new(ObjFunction* function);
 ObjFunction* function_new(void);
 ObjNative* native_new(NativeFn function, int arity);

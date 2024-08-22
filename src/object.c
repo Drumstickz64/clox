@@ -52,6 +52,12 @@ static uint32_t hash_string(const char* key, int len) {
     return hash;
 }
 
+ObjClass* class_new(ObjString* name) {
+    ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
+    klass->name = name;
+    return klass;
+}
+
 ObjClosure* closure_new(ObjFunction* function) {
     ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*, function->upvalue_count);
     for (int i = 0; i < function->upvalue_count; i++) {
@@ -129,6 +135,9 @@ void obj_print(Value value) {
     ASSERT(value.type == VAL_OBJ, "the value to print is an object");
 
     switch (OBJ_TYPE(value)) {
+        case OBJ_CLASS:
+            printf("<class %s>", AS_CLASS(value)->name->chars);
+            break;
         case OBJ_CLOSURE:
             function_print(AS_CLOSURE(value)->function);
             break;

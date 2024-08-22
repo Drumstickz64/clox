@@ -163,6 +163,9 @@ counter(); // "1".
 print "should print 2";
 counter(); // "2".
 
+class Brioche {}
+print Brioche;
+
 // class Breakfast {
 //   cook() {
 //     print "Eggs a-fryin'!";

@@ -34,6 +34,7 @@ typedef enum OpCode {
     OP_CLOSURE,
     OP_CLOSE_UPVALUE,
     OP_RETURN,
+    OP_CLASS,
 } OpCode;
 
 typedef struct Chunk {

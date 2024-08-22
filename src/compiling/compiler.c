@@ -71,6 +71,7 @@ typedef struct Compiler {
 } Compiler;
 
 static void declaration(void);
+static void class_declaration(void);
 static void fun_declaration(void);
 static void var_declaration(void);
 static void statement(void);
@@ -399,7 +400,9 @@ static void define_variable(uint8_t global) {
 }
 
 static void declaration(void) {
-    if (match(TOKEN_FUN)) {
+    if (match(TOKEN_CLASS)) {
+        class_declaration();
+    } else if (match(TOKEN_FUN)) {
         fun_declaration();
     } else if (match(TOKEN_VAR)) {
         var_declaration();
@@ -443,6 +446,18 @@ static void function(FunctionType type) {
         emit_byte(upvalue->is_local ? 1 : 0);
         emit_byte(upvalue->index);
     }
+}
+
+static void class_declaration(void) {
+    consume(TOKEN_IDENTIFIER, "expected class name");
+    uint8_t name_constant = identifier_constant(&parser.prev_token);
+
+    declare_variable();
+    emit_byte2(OP_CLASS, name_constant);
+    define_variable(name_constant);
+
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
 }
 
 static void fun_declaration(void) {

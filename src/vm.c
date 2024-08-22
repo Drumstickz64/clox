@@ -221,6 +221,9 @@ static InterpretResult run(void) {
                 frame = &vm.frames[vm.frame_count - 1];
                 break;
             }
+            case OP_CLASS:
+                push(OBJ_VAL(class_new(READ_STRING())));
+                break;
             case OP_CLOSURE: {
                 ObjFunction* function = AS_FUNCTION(READ_CONSTANT());
                 ObjClosure* closure = closure_new(function);

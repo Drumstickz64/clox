@@ -148,8 +148,9 @@ static bool is_falsy(Value value) {
 }
 
 static void concatenate(void) {
-    ObjString* b = AS_STRING(pop());
-    ObjString* a = AS_STRING(pop());
+    ObjString* b = AS_STRING(peek(0));
+    ObjString* a = AS_STRING(peek(1));
+
     int len = a->len + b->len;
     char* chars = ALLOCATE(char, len + 1);
     memcpy(chars, a->chars, a->len);
@@ -157,6 +158,8 @@ static void concatenate(void) {
     chars[len] = '\0';
 
     ObjString* result = take_string(chars, len);
+    pop();
+    pop();
     push(OBJ_VAL(result));
 }
 
@@ -398,7 +401,10 @@ static InterpretResult run(void) {
 
 void init_vm(void) {
     reset_stack();
+
     vm.objects = NULL;
+    vm.bytes_allocated = 0;
+    vm.next_gc = 1024 * 1024;
     vm.gray_count = 0;
     vm.gray_capacity = 0;
     vm.gray_stack = NULL;

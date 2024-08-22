@@ -934,7 +934,7 @@ ObjFunction* compile(const char* source) {
 
 void mark_compiler_roots(void) {
     Compiler* compiler = current;
-    while (compiler) {
+    while (compiler != NULL) {
         mark_object((Obj*)compiler->function);
         compiler = compiler->enclosing;
     }

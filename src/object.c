@@ -35,7 +35,9 @@ static ObjString* allocate_string_obj(char* chars, int len, uint32_t hash) {
     string_obj->chars = chars;
     string_obj->hash = hash;
 
+    push(OBJ_VAL(string_obj));
     table_set(&vm.strings, string_obj, NIL_VAL);
+    pop();
 
     return string_obj;
 }

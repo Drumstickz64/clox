@@ -165,6 +165,7 @@ counter(); // "2".
 
 class Brioche {}
 print Brioche;
+print Brioche();
 
 // class Breakfast {
 //   cook() {

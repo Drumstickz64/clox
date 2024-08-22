@@ -58,6 +58,14 @@ ObjClass* class_new(ObjString* name) {
     return klass;
 }
 
+ObjInstance* instance_new(ObjClass* klass) {
+    ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
+    instance->klass = klass;
+    table_init(&instance->fields);
+
+    return instance;
+}
+
 ObjClosure* closure_new(ObjFunction* function) {
     ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*, function->upvalue_count);
     for (int i = 0; i < function->upvalue_count; i++) {
@@ -137,6 +145,10 @@ void obj_print(Value value) {
     switch (OBJ_TYPE(value)) {
         case OBJ_CLASS:
             printf("<class %s>", AS_CLASS(value)->name->chars);
+            break;
+        case OBJ_INSTANCE:
+            printf("<instance of class %s>",
+                   AS_INSTANCE(value)->klass->name->chars);
             break;
         case OBJ_CLOSURE:
             function_print(AS_CLOSURE(value)->function);

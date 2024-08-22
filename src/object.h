@@ -3,10 +3,12 @@
 
 #include "chunk.h"
 #include "common.h"
+#include "table.h"
 #include "value.h"
 
 typedef enum ObjType {
     OBJ_CLASS,
+    OBJ_INSTANCE,
     OBJ_CLOSURE,
     OBJ_FUNCTION,
     OBJ_NATIVE,
@@ -62,8 +64,15 @@ typedef struct ObjClass {
     ObjString* name;
 } ObjClass;
 
+typedef struct ObjInstance {
+    Obj obj;
+    ObjClass* klass;
+    Table fields;
+} ObjInstance;
+
 #define OBJ_TYPE(value_struct) (AS_OBJ(value_struct)->type)
 
+#define IS_INSTANCE(value) isObjType(value, OBJ_INSTANCE)
 #define IS_CLASS(value) isObjType(value, OBJ_CLASS)
 #define IS_CLOSURE(obj) (obj_is_type(obj, OBJ_CLOSURE))
 #define IS_FUNCTION(obj) (obj_is_type(obj, OBJ_FUNCTION))
@@ -73,6 +82,7 @@ typedef struct ObjClass {
 #define AS_STRING(value) ((ObjString*)AS_OBJ(value))
 #define AS_CSTRING(value) (((ObjString*)AS_OBJ(value))->chars)
 #define AS_CLASS(value) ((ObjClass*)AS_OBJ(value))
+#define AS_INSTANCE(value) ((ObjInstance*)AS_OBJ(value))
 #define AS_CLOSURE(value) ((ObjClosure*)AS_OBJ(value))
 #define AS_FUNCTION(value) ((ObjFunction*)AS_OBJ(value))
 #define AS_NATIVE(value) (((ObjNative*)AS_OBJ(value)))
@@ -82,6 +92,7 @@ static inline bool obj_is_type(Value value, ObjType type) {
 }
 
 ObjClass* class_new(ObjString* name);
+ObjInstance* instance_new(ObjClass* klass);
 ObjClosure* closure_new(ObjFunction* function);
 ObjFunction* function_new(void);
 ObjNative* native_new(NativeFn function, int arity);

@@ -55,6 +55,7 @@ static uint32_t hash_string(const char* key, int len) {
 ObjClass* class_new(ObjString* name) {
     ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
     klass->name = name;
+    table_init(&klass->methods);
     return klass;
 }
 

@@ -132,6 +132,8 @@ int disassemble_instruction(Chunk* chunk, int offset) {
             return byte_instruction("OP_CALL", chunk, offset);
         case OP_CLASS:
             return constant_instruction("OP_CLASS", chunk, offset);
+        case OP_METHOD:
+            return constant_instruction("OP_METHOD", chunk, offset);
         default:
             printf("unknown instruction %d\n", instruction);
             return offset + 1;

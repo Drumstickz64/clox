@@ -177,17 +177,15 @@ counter(); // "2".
   print pair.first + pair.second;
 }
 
-// class Breakfast {
-//   cook() {
-//     print "Eggs a-fryin'!";
-//   }
+class Breakfast {
+  cook() {
+    print "Eggs a-fryin'!";
+  }
 
-//   serve(who) {
-//     print "Enjoy your breakfast, " + who + ".";
-//   }
-// }
-
-// print Breakfast;
+  serve(who) {
+    print "Enjoy your breakfast, " + who + ".";
+  }
+}
 
 // class Bagel {}
 // var bagel = Bagel();

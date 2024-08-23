@@ -72,6 +72,7 @@ typedef struct Compiler {
 
 static void declaration(void);
 static void class_declaration(void);
+static void method(void);
 static void fun_declaration(void);
 static void var_declaration(void);
 static void statement(void);
@@ -400,6 +401,85 @@ static void define_variable(uint8_t global) {
     emit_byte2(OP_DEFINE_GLOBAL, global);
 }
 
+static int resolve_local(Compiler* compiler, Token* name) {
+    for (int i = compiler->local_count - 1; i >= 0; i--) {
+        Local* local = &compiler->locals[i];
+        if (identifiers_equal(name, &local->name)) {
+            if (local->depth == -1) {
+                error("can't read local variable in its own initializer");
+            }
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+static int add_upvalue(Compiler* compiler, uint8_t index, bool is_local) {
+    int upvalue_index = compiler->function->upvalue_count;
+
+    for (int i = 0; i < upvalue_index; i++) {
+        Upvalue* upvalue = &compiler->upvalues[i];
+        if (upvalue->index == index && upvalue->is_local == is_local) {
+            return i;
+        }
+    }
+
+    if (compiler->function->upvalue_count == UINT8_COUNT) {
+        error("too many closure variables in function");
+        return 0;
+    }
+
+    compiler->upvalues[upvalue_index].is_local = is_local;
+    compiler->upvalues[upvalue_index].index = index;
+    compiler->function->upvalue_count++;
+
+    return upvalue_index;
+}
+
+static int resolve_upvalue(Compiler* compiler, Token* name) {
+    if (!compiler->enclosing) {
+        return -1;
+    }
+
+    int local = resolve_local(compiler->enclosing, name);
+    if (local != -1) {
+        compiler->enclosing->locals[local].is_captured = true;
+        return add_upvalue(compiler, (uint8_t)local, true);
+    }
+
+    int upvalue = resolve_upvalue(compiler->enclosing, name);
+    if (upvalue != -1) {
+        return add_upvalue(compiler, (uint8_t)upvalue, false);
+    }
+
+    return -1;
+}
+
+static void named_variable(Token name, bool can_assign) {
+    uint8_t get_op, set_op;
+    int arg = resolve_local(current, &name);
+
+    if (arg != -1) {
+        get_op = OP_GET_LOCAL;
+        set_op = OP_SET_LOCAL;
+    } else if ((arg = resolve_upvalue(current, &name)) != -1) {
+        get_op = OP_GET_UPVALUE;
+        set_op = OP_SET_UPVALUE;
+    } else {
+        arg = identifier_constant(&name);
+        get_op = OP_GET_GLOBAL;
+        set_op = OP_SET_GLOBAL;
+    }
+
+    if (can_assign && match(TOKEN_EQUAL)) {
+        expression();
+        emit_byte2(set_op, (uint8_t)arg);
+    } else {
+        emit_byte2(get_op, (uint8_t)arg);
+    }
+}
+
 static void declaration(void) {
     if (match(TOKEN_CLASS)) {
         class_declaration();
@@ -451,14 +531,29 @@ static void function(FunctionType type) {
 
 static void class_declaration(void) {
     consume(TOKEN_IDENTIFIER, "expected class name");
+    Token class_name = parser.prev_token;
     uint8_t name_constant = identifier_constant(&parser.prev_token);
 
     declare_variable();
     emit_byte2(OP_CLASS, name_constant);
     define_variable(name_constant);
 
+    named_variable(class_name, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+    while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
+        method();
+    }
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+    emit_byte(OP_POP);
+}
+
+static void method(void) {
+    consume(TOKEN_IDENTIFIER, "expected method name");
+    uint8_t name = identifier_constant(&parser.prev_token);
+
+    FunctionType type = TYPE_FUNCTION;
+    function(type);
+    emit_byte2(OP_METHOD, name);
 }
 
 static void fun_declaration(void) {
@@ -824,85 +919,6 @@ static void grouping(bool can_assign) {
     UNUSED(can_assign);
     expression();
     consume(TOKEN_RIGHT_PAREN, "expected ')' after expression");
-}
-
-static int resolve_local(Compiler* compiler, Token* name) {
-    for (int i = compiler->local_count - 1; i >= 0; i--) {
-        Local* local = &compiler->locals[i];
-        if (identifiers_equal(name, &local->name)) {
-            if (local->depth == -1) {
-                error("can't read local variable in its own initializer");
-            }
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-static int add_upvalue(Compiler* compiler, uint8_t index, bool is_local) {
-    int upvalue_index = compiler->function->upvalue_count;
-
-    for (int i = 0; i < upvalue_index; i++) {
-        Upvalue* upvalue = &compiler->upvalues[i];
-        if (upvalue->index == index && upvalue->is_local == is_local) {
-            return i;
-        }
-    }
-
-    if (compiler->function->upvalue_count == UINT8_COUNT) {
-        error("too many closure variables in function");
-        return 0;
-    }
-
-    compiler->upvalues[upvalue_index].is_local = is_local;
-    compiler->upvalues[upvalue_index].index = index;
-    compiler->function->upvalue_count++;
-
-    return upvalue_index;
-}
-
-static int resolve_upvalue(Compiler* compiler, Token* name) {
-    if (!compiler->enclosing) {
-        return -1;
-    }
-
-    int local = resolve_local(compiler->enclosing, name);
-    if (local != -1) {
-        compiler->enclosing->locals[local].is_captured = true;
-        return add_upvalue(compiler, (uint8_t)local, true);
-    }
-
-    int upvalue = resolve_upvalue(compiler->enclosing, name);
-    if (upvalue != -1) {
-        return add_upvalue(compiler, (uint8_t)upvalue, false);
-    }
-
-    return -1;
-}
-
-static void named_variable(Token name, bool can_assign) {
-    uint8_t get_op, set_op;
-    int arg = resolve_local(current, &name);
-
-    if (arg != -1) {
-        get_op = OP_GET_LOCAL;
-        set_op = OP_SET_LOCAL;
-    } else if ((arg = resolve_upvalue(current, &name)) != -1) {
-        get_op = OP_GET_UPVALUE;
-        set_op = OP_SET_UPVALUE;
-    } else {
-        arg = identifier_constant(&name);
-        get_op = OP_GET_GLOBAL;
-        set_op = OP_SET_GLOBAL;
-    }
-
-    if (can_assign && match(TOKEN_EQUAL)) {
-        expression();
-        emit_byte2(set_op, (uint8_t)arg);
-    } else {
-        emit_byte2(get_op, (uint8_t)arg);
-    }
 }
 
 static void variable(bool can_assign) {

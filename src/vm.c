@@ -148,6 +148,19 @@ static void close_upvalues(Value* last) {
     }
 }
 
+static void define_method(ObjString* name) {
+    ASSERT(
+        IS_CLOSURE(peek(0)),
+        "the top of the stack is the closure to be associated with the class");
+    ASSERT(IS_CLASS(peek(1)),
+           "there is a class behind the method to associate it with");
+
+    Value method = peek(0);
+    ObjClass* klass = AS_CLASS(peek(1));
+    table_set(&klass->methods, name, method);
+    pop();
+}
+
 static bool is_falsy(Value value) {
     return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
@@ -228,6 +241,9 @@ static InterpretResult run(void) {
             }
             case OP_CLASS:
                 push(OBJ_VAL(class_new(READ_STRING())));
+                break;
+            case OP_METHOD:
+                define_method(READ_STRING());
                 break;
             case OP_CLOSURE: {
                 ObjFunction* function = AS_FUNCTION(READ_CONSTANT());

@@ -177,31 +177,25 @@ counter(); // "2".
   print pair.first + pair.second;
 }
 
-class Breakfast {
-  cook() {
-    print "Eggs a-fryin'!";
-  }
+class Bagel {}
+var bagel = Bagel();
+print bagel; // Prints "<instance of class Bagel>".
 
-  serve(who) {
-    print "Enjoy your breakfast, " + who + ".";
+bagel.size = "large";
+print bagel.size;
+
+class Bacon {
+  eat(word) {
+    print word + " " + word + " " + word + "!";
   }
 }
 
-// class Bagel {}
-// var bagel = Bagel();
-// print bagel; // Prints "<instance of class Bagel>".
+var baconIns = Bacon();
+baconIns.eat("crunch");
+// Bacon().doesNotExist(); // invalid
 
-// bagel.size = "large";
-// print bagel.size;
-
-// class Bacon {
-//   eat() {
-//     print "Crunch crunch crunch!";
-//   }
-// }
-
-// Bacon().eat(); // Prints "Crunch crunch crunch!".
-// // Bacon().doesNotExist(); // invalid
+var baconEat = Bacon().eat;
+baconEat("munch");
 
 // class Cake {
 //   taste() {

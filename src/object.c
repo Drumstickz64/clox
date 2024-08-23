@@ -52,6 +52,13 @@ static uint32_t hash_string(const char* key, int len) {
     return hash;
 }
 
+ObjBoundMethod* bound_method_new(Value receiver, ObjClosure* method) {
+    ObjBoundMethod* bound = ALLOCATE_OBJ(ObjBoundMethod, OBJ_BOUND_METHOD);
+    bound->receiver = receiver;
+    bound->method = method;
+    return bound;
+}
+
 ObjClass* class_new(ObjString* name) {
     ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
     klass->name = name;
@@ -144,6 +151,9 @@ void obj_print(Value value) {
     ASSERT(value.type == VAL_OBJ, "the value to print is an object");
 
     switch (OBJ_TYPE(value)) {
+        case OBJ_BOUND_METHOD:
+            function_print(AS_BOUND_METHOD(value)->method->function);
+            break;
         case OBJ_CLASS:
             printf("<class %s>", AS_CLASS(value)->name->chars);
             break;

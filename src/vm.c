@@ -86,6 +86,10 @@ static bool call(ObjClosure* closure, int arg_count) {
 static bool call_value(Value callee, int arg_count) {
     if (IS_OBJ(callee)) {
         switch (OBJ_TYPE(callee)) {
+            case OBJ_BOUND_METHOD: {
+                ObjBoundMethod* bound = AS_BOUND_METHOD(callee);
+                return call(bound->method, arg_count);
+            }
             case OBJ_CLASS: {
                 ObjClass* klass = AS_CLASS(callee);
                 vm.stack_top[-arg_count - 1] = OBJ_VAL(instance_new(klass));
@@ -113,6 +117,20 @@ static bool call_value(Value callee, int arg_count) {
 
     runtime_error("can only call functions and classes");
     return false;
+}
+
+static bool bind_method(ObjClass* klass, ObjString* name) {
+    Value method;
+    if (!table_get(&klass->methods, name, &method)) {
+        runtime_error("undefined property '%s'.", name->chars);
+        return false;
+    }
+
+    ObjBoundMethod* bound = bound_method_new(peek(0), AS_CLOSURE(method));
+
+    pop();
+    push(OBJ_VAL(bound));
+    return true;
 }
 
 static ObjUpvalue* capture_upvalue(Value* local) {
@@ -362,13 +380,15 @@ static InterpretResult run(void) {
                 ObjString* name = READ_STRING();
 
                 Value value;
-                if (!table_get(&instance->fields, name, &value)) {
-                    runtime_error("undefined property '%s'.", name->chars);
-                    return INTERPRET_RUNTIME_ERROR;
+                if (table_get(&instance->fields, name, &value)) {
+                    pop();  // instance
+                    push(value);
+                    break;
                 }
 
-                pop();  // instance
-                push(value);
+                if (!bind_method(instance->klass, name)) {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
                 break;
             }
             case OP_SET_PROPERTY: {

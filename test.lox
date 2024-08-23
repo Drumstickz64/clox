@@ -197,35 +197,69 @@ baconIns.eat("crunch");
 var baconEat = Bacon().eat;
 baconEat("munch");
 
-// class Cake {
-//   taste() {
-//     var adjective = "delicious";
-//     print "The " + this.flavor + " cake is " + adjective + "!";
-//   }
+
+var cake;
+var printCake;
+{
+  class Cake {
+    taste() {
+      var adjective = "delicious";
+      print "The " + this.flavor + " cake is " + adjective + "!";
+    }
+
+    printer() {
+      fun inner() {
+        print "Printing the " + this.flavor + " cake!";
+      }
+
+      return inner;
+    }
+  }
+
+  cake = Cake();
+  var tmpCake = Cake();
+  tmpCake.flavor = "Vanilla";
+  printCake = tmpCake.printer();
+}
+
+cake.flavor = "German chocolate";
+cake.taste(); // Prints "The German chocolate cake is delicious!".
+printCake();
+
+class Thing {
+  getCallback() {
+    fun localFunction() {
+      print this;
+    }
+
+    return localFunction;
+  }
+
+  getInnerClass() {
+    class InnerThing {
+      getCallback() {
+        fun localFunction() {
+          print this;
+        }
+
+        return localFunction;
+      }
+    }
+
+    return InnerThing;
+  }
+}
+
+var callback = Thing().getCallback();
+callback();
+var innerCallback = Thing().getInnerClass()().getCallback();
+innerCallback();
+
+// print this; // invalid
+
+// fun notAMethod() {
+//   print this; // invalid
 // }
-
-// var cake = Cake();
-// cake.flavor = "German chocolate";
-// cake.taste(); // Prints "The German chocolate cake is delicious!".
-
-// class Thing {
-//   getCallback() {
-//     fun localFunction() {
-//       print this;
-//     }
-
-//     return localFunction;
-//   }
-// }
-
-// var callback = Thing().getCallback();
-// callback();
-
-// // print this; // invalid
-
-// // fun notAMethod() {
-// //   print this; // invalid
-// // }
 
 // class Player {
 //   init(level) {

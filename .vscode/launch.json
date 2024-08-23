@@ -9,7 +9,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/out/build/GCC 13.2.0 x86_64-w64-mingw32/clox.exe",
-      "args": [],
+      "args": ["${workspaceFolder}/test.lox"],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
       "environment": [],

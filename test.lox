@@ -1,20 +1,26 @@
-print "Hello" + " World";
-print (1 + 2 - 3) / (4 * -5);
-print 1 > 2;
-print 1 >= 2;
-print 1 < 2;
-print 1 <= 2;
-print 1 == 2;
-print 1 != 2;
+// this exists because this script exceeds the
+// maximum amount of constants in the global chunk
+fun basicTest() {
+  print "Hello" + " World";
+  print (1 + 2 - 3) / (4 * -5);
+  print 1 > 2;
+  print 1 >= 2;
+  print 1 < 2;
+  print 1 <= 2;
+  print 1 == 2;
+  print 1 != 2;
 
-var name = "ahmed";
-var age = 12;
+  var name = "ahmed";
+  var age = 12;
 
-print "Hello. My name is";
-print name;
-print "I'm";
-print age;
-print "years old";
+  print "Hello. My name is";
+  print name;
+  print "I'm";
+  print age;
+  print "years old";
+}
+
+basicTest();
 
 var a;
 var b;
@@ -292,44 +298,44 @@ innerCallback();
 
 }
 
-// class Doughnut {
-//   cook() {
-//     print "Fry until golden brown.";
-//   }
+class Doughnut {
+  cook() {
+    print "Fry until golden brown.";
+  }
 
-//   invalidSuper() {
-//     // super.doSomething(); // invalid
-//   }
-// }
+  // invalidSuper() {
+    // super.doSomething(); // invalid
+  // }
+}
 
-// class BostonCream < Doughnut {
-//   cook() {
-//     super.cook();
-//     print "Pipe full of custard and coat with chocolate.";
-//   }
-// }
+class BostonCream < Doughnut {
+  cook() {
+    super.cook();
+    print "Pipe full of custard and coat with chocolate.";
+  }
+}
 
-// class ChocolateDoughnut < Doughnut {
-//   init(type) {
-//     this.type = type;
-//   }
+class ChocolateDoughnut < Doughnut {
+  init(type) {
+    this.type = type;
+  }
 
-//   getChocolateType() {
-//     return this.type;
-//   }
+  getChocolateType() {
+    return this.type;
+  }
 
-//   cook() {
-//     super.cook();
-//     print "Pour";
-//     print this.type;
-//     print "chocolate on top.";
-//   }
-// }
+  cook() {
+    super.cook();
+    print "Pour";
+    print this.type;
+    print "chocolate on top.";
+  }
+}
 
-// BostonCream().cook();
-// var choco = ChocolateDoughnut("dark");
-// print choco.getChocolateType();
-// choco.cook();
+BostonCream().cook();
+var choco = ChocolateDoughnut("dark");
+print choco.getChocolateType();
+choco.cook();
 
 // class Oops < Oops {} // invalid
 

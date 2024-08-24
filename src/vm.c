@@ -28,6 +28,7 @@ static void reset_stack(void) {
 }
 
 static void runtime_error(const char* format, ...) {
+    printf("ERROR: ");
     va_list args;
     va_start(args, format);
     vfprintf(stderr, format, args);
@@ -129,7 +130,7 @@ static bool call_value(Value callee, int arg_count) {
     return false;
 }
 
-static bool invokeFromClass(ObjClass* klass, ObjString* name, int arg_count) {
+static bool invoke_from_class(ObjClass* klass, ObjString* name, int arg_count) {
     Value method;
     if (!table_get(&klass->methods, name, &method)) {
         runtime_error("undefined property '%s'.", name->chars);
@@ -155,7 +156,7 @@ static bool invoke(ObjString* name, int arg_count) {
         return call_value(field, arg_count);
     }
 
-    return invokeFromClass(instance->klass, name, arg_count);
+    return invoke_from_class(instance->klass, name, arg_count);
 }
 
 static bool bind_method(ObjClass* klass, ObjString* name) {
@@ -299,6 +300,23 @@ static InterpretResult run(void) {
             case OP_CLASS:
                 push(OBJ_VAL(class_new(READ_STRING())));
                 break;
+            case OP_INHERIT: {
+                Value superclass = peek(1);
+                if (!IS_CLASS(superclass)) {
+                    runtime_error("superclass must be a class");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                ASSERT(IS_CLASS(peek(0)),
+                       "the top of the stack is a class when executing "
+                       "OP_INHERIT");
+                ObjClass* subclass = AS_CLASS(peek(0));
+
+                table_add_all(&AS_CLASS(superclass)->methods,
+                              &subclass->methods);
+                pop();  // subclass
+                break;
+            }
             case OP_METHOD:
                 define_method(READ_STRING());
                 break;
@@ -351,6 +369,20 @@ static InterpretResult run(void) {
                 uint8_t arg_count = READ_BYTE();
 
                 if (!invoke(method_name, arg_count)) {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                frame = &vm.frames[vm.frame_count - 1];
+                break;
+            }
+            case OP_SUPER_INVOKE: {
+                ObjString* method_name = READ_STRING();
+                uint8_t arg_count = READ_BYTE();
+                ASSERT(IS_CLASS(peek(0)),
+                       "the top of the stack is a class when executing "
+                       "OP_SUPER_INVOKE");
+                ObjClass* superclass = AS_CLASS(pop());
+                if (!invoke_from_class(superclass, method_name, arg_count)) {
                     return INTERPRET_RUNTIME_ERROR;
                 }
 
@@ -452,6 +484,16 @@ static InterpretResult run(void) {
                 Value value = pop();
                 pop();
                 push(value);
+                break;
+            }
+            case OP_GET_SUPER: {
+                ObjString* name = READ_STRING();
+                ObjClass* superclass = AS_CLASS(pop());
+
+                if (!bind_method(superclass, name)) {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
                 break;
             }
             case OP_EQUAL: {

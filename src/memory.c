@@ -142,6 +142,8 @@ static void mark_roots(void) {
     mark_table(&vm.globals);
 
     mark_compiler_roots();
+
+    mark_object((Obj*)vm.init_string);
 }
 
 void mark_value(Value value) {

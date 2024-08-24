@@ -56,6 +56,7 @@ typedef struct {
 
 typedef enum FunctionType {
     TYPE_FUNCTION,
+    TYPE_INITIALIZER,
     TYPE_METHOD,
     TYPE_SCRIPT,
 } FunctionType;
@@ -236,7 +237,12 @@ static void emit_constant(Value value) {
 }
 
 static void emit_return(void) {
-    emit_byte(OP_NIL);
+    if (current->type == TYPE_INITIALIZER) {
+        emit_byte2(OP_GET_LOCAL, 0);  // get instance
+    } else {
+        emit_byte(OP_NIL);
+    }
+
     emit_byte(OP_RETURN);
 }
 
@@ -572,6 +578,10 @@ static void method(void) {
     uint8_t name = identifier_constant(&parser.prev_token);
 
     FunctionType type = TYPE_METHOD;
+    if (parser.prev_token.length == 4 &&
+        memcmp(parser.prev_token.start, "init", 4) == 0) {
+        type = TYPE_INITIALIZER;
+    }
     function(type);
     emit_byte2(OP_METHOD, name);
 }
@@ -698,6 +708,10 @@ static void return_statement(void) {
     if (match(TOKEN_SEMICOLON)) {
         emit_return();
         return;
+    }
+
+    if (current->type == TYPE_INITIALIZER) {
+        error("can't return a value from an initializer");
     }
 
     expression();
@@ -846,6 +860,10 @@ static void dot(bool can_assign) {
     if (can_assign && match(TOKEN_EQUAL)) {
         expression();
         emit_byte2(OP_SET_PROPERTY, name_constant);
+    } else if (match(TOKEN_LEFT_PAREN)) {
+        uint8_t arg_count = argument_list();
+        emit_byte2(OP_INVOKE, name_constant);
+        emit_byte(arg_count);
     } else {
         emit_byte2(OP_GET_PROPERTY, name_constant);
     }

@@ -261,29 +261,36 @@ innerCallback();
 //   print this; // invalid
 // }
 
-// class Player {
-//   init(level) {
-//     this.health = level * 200;
-//     this.strength = level * 2;
-//     this.canUseMagic = false;
-//     if (level >= 20) {
-//       this.canUseMagic = true;
-//     }
-//   }
+{
+  class Player {
+    init(level) {
+      this.health = level * 200;
+      this.strength = level * 2;
+      this.canUseMagic = level >= 20;
+    }
 
-//   cast(spell) {
-//     if (this.canUseMagic) {
-//       print "Casted " + spell + "!";
-//     } else {
-//       print "You can't use magic.";
-//     }
-//   }
-// }
+    cast(spell) {
+      if (this.canUseMagic) {
+        print "Casted " + spell + "!";
+      } else {
+        print "You can't use magic.";
+      }
+    }
+  }
 
-// var plr = Player(20);
-// print plr.health;
-// print plr.strength;
-// plr.cast("Fireball");
+  var plr = Player(20);
+  print plr.health;
+  print plr.strength;
+  plr.cast("Fireball");
+
+  fun fieldCast() {
+    print "Casted Freeze Ray!";
+  }
+
+  plr.cast = fieldCast;
+  plr.cast();
+
+}
 
 // class Doughnut {
 //   cook() {

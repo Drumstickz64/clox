@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "config.h"
+
+#ifdef DEBUG_ENABLE_ASSERT
 #define ASSERT(expr, assertion)                                \
     {                                                          \
         if (!(expr)) {                                         \
@@ -16,6 +19,10 @@
             exit(1);                                           \
         }                                                      \
     }
+#else
+#define ASSERT(expr, assert) \
+    {}
+#endif
 
 #define UNREACHABLE(msg)                                       \
     {                                                          \

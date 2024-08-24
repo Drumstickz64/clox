@@ -19,6 +19,13 @@ option(DEBUG_TRACE_EXECUTION OFF)
 option(DEBUG_STRESS_GC OFF)
 option(DEBUG_LOG_GC OFF)
 
+option(DEBUG_ENABLE_ASSERT ON)
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+  set(DEBUG_ENABLE_ASSERT OFF)
+else()
+  set(DEBUG_ENABLE_ASSERT ON)
+endif()
+
 configure_file("src/config.h.in" "src/config.h")
 
 if(MSVC)

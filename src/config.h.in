@@ -2,3 +2,4 @@
 #cmakedefine DEBUG_TRACE_EXECUTION
 #cmakedefine DEBUG_STRESS_GC
 #cmakedefine DEBUG_LOG_GC
+#cmakedefine DEBUG_ENABLE_ASSERT
